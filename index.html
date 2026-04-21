@@ -604,7 +604,6 @@ const ALL_SKILLS = [
 
 // 掉落表
 const DROP_TABLE = [
-  { id: 'fragment', name: '几何碎片', icon: '💎', desc: '+10局外货币', weight: 30 },
   { id: 'energy', name: '能量球', icon: '⚡', desc: '+50能量', weight: 25 },
   { id: 'scatterBuff', name: '散弹碎片', icon: '🔷', desc: '30秒散弹', weight: 15 },
   { id: 'pierceBuff', name: '穿透碎片', icon: '🔷', desc: '20秒穿透', weight: 10 },
@@ -647,7 +646,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 let gameState = 'idle';
-let score = 0, grazeCount = 0, frameCount = 0, gameTime = 0;
+let score = 0, grazeCount = 0, frameCount = 0, gameTime = 0, totalEarnedFragments = 0;
 let damageReduction = true;
 let finalScore = 0, clearTime = 0;
 
@@ -727,7 +726,7 @@ function startGame() {
   const up = progressData.upgrades;
   
   gameState = 'playing';
-  score = 0; grazeCount = 0; frameCount = 0; gameTime = 0;
+  score = 0; grazeCount = 0; frameCount = 0; gameTime = 0; totalEarnedFragments = 0;
   damageReduction = true;
   lastTime = 0; accumulator = 0;
   
@@ -994,17 +993,21 @@ function checkWaveComplete() {
     
     // 显示技能选择
     gameState = 'skillSelect';
-    showSkillSelect(reward);
+    showSkillSelect();
   }
 }
 
-function showSkillSelect(waveReward) {
+function showSkillSelect() {
+  // 累计本局获得的碎片
+  const reward = WAVE_REWARDS[currentWave];
+  totalEarnedFragments += reward;
+  
   gameState = 'skillSelect';
   showScreen('waveSelectScreen');
   document.getElementById('waveSelectScreen').classList.add('transparent');
   
   document.getElementById('waveSelectTitle').textContent = `第 ${currentWave + 1} 波完成！`;
-  document.getElementById('unlockedWeaponsDisplay').textContent = `💎 +${waveReward} 几何碎片`;
+  document.getElementById('unlockedWeaponsDisplay').textContent = '';
   
   // 随机选择3个技能
   const available = ALL_SKILLS.filter(s => {
@@ -1326,9 +1329,6 @@ function spawnDrop(x, y) {
 
 function applyDrop(drop) {
   switch (drop.id) {
-    case 'fragment':
-      progressData.geoFragments += 10;
-      break;
     case 'energy':
       player.energy = Math.min(getMaxEnergy(), player.energy + 50);
       break;
@@ -1503,13 +1503,17 @@ function showGameOver(isVictory) {
   const stats = document.getElementById('gameOverStats');
   const finalScore = calculateFinalScoreGameOver();
   
+  // 结算时统一添加碎片
+  progressData.geoFragments += totalEarnedFragments;
+  saveProgress();
+  
   if (isVictory) {
     title.textContent = '🎉 通关成功！';
     title.style.color = '#00ffff';
     stats.innerHTML = `
       <p>到达波次：第10波</p>
       <p>用时：${Math.floor(clearTime)}秒</p>
-      <p>本局获得：💎 +${WAVE_REWARDS.reduce((a,b)=>a+b,0)}</p>
+      <p>本局获得：💎 +${totalEarnedFragments}</p>
       <p>生命剩余：${player.lives}条</p>
       <p style="margin-top:15px;color:#ffff00;">⭐ 总分: ${finalScore}</p>
       <button class="btn" onclick="showLeaderboardFromEnd()" style="margin-top:20px;">🏆 查看排行榜</button>
@@ -1519,7 +1523,7 @@ function showGameOver(isVictory) {
     title.style.color = '#ff4444';
     stats.innerHTML = `
       <p>到达波次：第${currentWave + 1}波</p>
-      <p>本局获得：💎 +${WAVE_REWARDS.slice(0, currentWave + 1).reduce((a,b)=>a+b,0)}</p>
+      <p>本局获得：💎 +${totalEarnedFragments}</p>
       <p style="margin-top:15px;color:#ffff00;">⭐ 总分: ${finalScore}</p>
       <button class="btn" onclick="showLeaderboardFromEnd()" style="margin-top:20px;">🏆 查看排行榜</button>
     `;
@@ -1987,7 +1991,6 @@ function render() {
   ctx.font = '16px Courier New'; ctx.textAlign = 'left'; ctx.fillStyle = '#ffffff';
   ctx.fillText('波次: ' + (currentWave + 1) + '/10', 10, 25);
   ctx.fillText('击杀: ' + waveEnemiesKilled + '/' + waveEnemiesTotal, 10, 45);
-  ctx.fillText('💎 ' + progressData.geoFragments, 10, 65);
   
   // Weapon mode
   if (weaponMode !== 'basic' || weaponBuffTimer > 0) {
