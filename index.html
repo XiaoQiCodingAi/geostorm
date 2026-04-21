@@ -496,32 +496,6 @@ async function showLeaderboardFromEnd() {
     btn.onclick = () => showScreen('gameOverScreen');
   }
 }
-    const data = await res.json();
-    
-    const list = document.getElementById('leaderboardList');
-    if (data.length === 0) {
-      list.innerHTML = '<p style="color:#666;text-align:center;padding:50px;">暂无记录</p>';
-    } else {
-      list.innerHTML = data.map((r, i) => {
-        let cls = '';
-        if (i === 0) cls = 'gold';
-        else if (i === 1) cls = 'silver';
-        else if (i === 2) cls = 'bronze';
-        return `
-          <div class="record-item ${cls}">
-            <span class="rank">${['🥇','🥈','🥉'][i] || (i+1)+'.'}</span>
-            <span class="info">${r.username}</span>
-            <span class="score">${r.score}分</span>
-            <span class="time">${r.clear_time ? Math.floor(r.clear_time) + "秒" : "-"}</span>
-          </div>
-        `;
-      }).join('');
-    }
-    showScreen('leaderboardScreen');
-  } catch (e) {
-    alert('获取榜单失败');
-  }
-}
 
 async function init() {
   loadProgress();
