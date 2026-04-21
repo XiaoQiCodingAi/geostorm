@@ -631,7 +631,7 @@ function startGame() {
   // 应用局外升级到局内
   const up = progressData.upgrades;
   
-  gameState = 'waveSelect';
+  gameState = 'playing';
   score = 0; grazeCount = 0; frameCount = 0; gameTime = 0;
   damageReduction = true;
   lastTime = 0; accumulator = 0;
@@ -661,8 +661,30 @@ function startGame() {
   progressData.totalGamesPlayed++;
   saveProgress();
   
-  showWaveSelect();
+  // 直接开始第一波
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  setupWave(currentWave);
+}
+
+function setupWave(waveIndex) {
+  const wave = ROGUE_WAVES[waveIndex];
+  waveEnemiesTotal = 0;
+  waveSpawnQueue = [];
+  waveEnemiesKilled = 0;
+  waveSpawnTimer = 0;
+  
+  for (const e of wave.enemies) {
+    const count = e.count || 0;
+    for (let i = 0; i < count; i++) {
+      waveSpawnQueue.push({
+        type: e.type === 'elite' ? getRandomEnemyType() : e.type,
+        isElite: e.type === 'elite' || (Math.random() < wave.eliteChance),
+        spawned: false
+      });
+      waveEnemiesTotal++;
+    }
+  }
+  boss = null;
 }
 
 function showWaveSelect() {
@@ -702,6 +724,7 @@ function showWaveSelect() {
 function startWaveFromSelect() {
   gameState = 'playing';
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  console.log('startWaveFromSelect called, player:', player.x, player.y, player.radius);
   
   const wave = ROGUE_WAVES[currentWave];
   
@@ -851,8 +874,8 @@ function checkWaveComplete() {
       return;
     }
     
-    // Show skill selection
-    currentWave++;
+    // 显示技能选择
+    gameState = 'skillSelect';
     showSkillSelect(reward);
   }
 }
@@ -1454,6 +1477,7 @@ function updateParticles() {
 }
 
 function render() {
+  if (frameCount === 0) console.log('render called, gameState:', gameState, 'player:', player);
   ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
   ctx.fillStyle = '#ffffff';
   for (let i = 0; i < 50; i++) { ctx.fillRect((i * 73 + frameCount * 0.1) % GAME_WIDTH, (i * 97 + frameCount * 0.05) % GAME_HEIGHT, 1, 1); }
