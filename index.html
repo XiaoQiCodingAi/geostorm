@@ -508,19 +508,19 @@ const FIRE_RATE = 14;
 const DAMAGE = 15;
 const ENEMY_TYPES = {
   // 三角形：三角箭 - 1正中+2侧角±20°
-  triangle: { hp: 30, speed: 1.2, bulletSpeed: 3.5, radius: 16, score: 150, color: '#ff6644', fireRate: 80, attackType: 'triangle' },
+  triangle: { hp: 30, speed: 1.2, bulletSpeed: 2.5, radius: 16, score: 150, color: '#ff6644', fireRate: 80, attackType: 'triangle' },
   // 四边形：四角弹 - 朝四个角发射
-  square: { hp: 60, speed: 1.0, bulletSpeed: 3.0, radius: 18, score: 250, color: '#ff8844', fireRate: 100, attackType: 'square' },
+  square: { hp: 60, speed: 1.0, bulletSpeed: 2.0, radius: 18, score: 250, color: '#ff8844', fireRate: 100, attackType: 'square' },
   // 圆形：脉冲型 - 扩散脉冲环
   circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff4444', fireRate: 120, attackType: 'pulse' },
   // 五边形：五连星 - 5发间隔0.3秒逐发
-  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 2.5, radius: 20, score: 400, color: '#44ffaa', fireRate: 90, attackType: 'pentagon' },
+  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#44ffaa', fireRate: 90, attackType: 'pentagon' },
   // 六边形：六芒脉冲 - 大脉冲+6发小弹
-  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 2.0, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
+  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 1.5, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
   // 追踪者：蓄力冲刺
   chaser: { hp: 40, speed: 2.5, bulletSpeed: 0, radius: 18, score: 300, color: '#44ff88', fireRate: 180, attackType: 'dash' },
   // 精英：组合攻击
-  elite: { hp: 150, speed: 1.0, bulletSpeed: 2.5, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
+  elite: { hp: 150, speed: 1.0, bulletSpeed: 2.0, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
 };
 
 const BOSS_HP = 3000;
@@ -1182,10 +1182,10 @@ function fireEnemyBullet(enemy) {
   // 根据攻击类型发射
   switch (enemy.attackType) {
     case 'triangle':
-      // 三角形：三角箭 - 1正中+2侧角±20°
+      // 三角形：三角箭 - 1正中+2侧角±15°（箭头形状朝玩家）
       enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 6, color: enemy.color, grazed: false });
-      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.35) * speed, vy: Math.sin(angle - 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
-      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.35) * speed, vy: Math.sin(angle + 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.26) * speed, vy: Math.sin(angle - 0.26) * speed, radius: 5, color: enemy.color, grazed: false });
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.26) * speed, vy: Math.sin(angle + 0.26) * speed, radius: 5, color: enemy.color, grazed: false });
       break;
     case 'square':
       // 四边形：四角弹 - 朝四个角发射
