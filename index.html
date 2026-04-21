@@ -1052,16 +1052,18 @@ function updateEnemies() {
         e.x += e.speed * 0.7; 
         e.y += Math.sin(e.movePhase) * 1.5;
         e.x += (dx / dist) * e.speed * trackStrength;
-        if (e.x > GAME_WIDTH + 30) e.x = -30; 
-        e.x = Math.max(-e.radius, Math.min(GAME_WIDTH + e.radius, e.x));
+        // 碰到边界反弹（不穿墙）
+        if (e.x <= e.radius || e.x >= GAME_WIDTH - e.radius) e.vx = -e.vx || -1;
+        e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
         e.y = Math.max(e.radius, Math.min(GAME_HEIGHT - e.radius, e.y));
       } else if (e.type === 'hexagon') { 
         e.movePhase += 0.03; 
         e.x -= e.speed * 0.8; 
         e.y += Math.sin(e.movePhase) * 1;
         e.x += (dx / dist) * e.speed * trackStrength;
-        if (e.x < -30) e.x = GAME_WIDTH + 30; 
-        e.x = Math.max(-e.radius, Math.min(GAME_WIDTH + e.radius, e.x));
+        // 碰到边界反弹（不穿墙）
+        if (e.x <= e.radius || e.x >= GAME_WIDTH - e.radius) e.vx = -e.vx || 1;
+        e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
         e.y = Math.max(e.radius, Math.min(GAME_HEIGHT - e.radius, e.y));
       }
     }
