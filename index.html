@@ -488,6 +488,41 @@ async function showLeaderboard() {
   }
 }
 
+async function showLeaderboardFromEnd() {
+  await showLeaderboard();
+  // 修改返回按钮返回游戏结束界面
+  const btn = document.querySelector('#leaderboardScreen .btn');
+  if (btn) {
+    btn.onclick = () => showScreen('gameOverScreen');
+  }
+}
+    const data = await res.json();
+    
+    const list = document.getElementById('leaderboardList');
+    if (data.length === 0) {
+      list.innerHTML = '<p style="color:#666;text-align:center;padding:50px;">暂无记录</p>';
+    } else {
+      list.innerHTML = data.map((r, i) => {
+        let cls = '';
+        if (i === 0) cls = 'gold';
+        else if (i === 1) cls = 'silver';
+        else if (i === 2) cls = 'bronze';
+        return `
+          <div class="record-item ${cls}">
+            <span class="rank">${['🥇','🥈','🥉'][i] || (i+1)+'.'}</span>
+            <span class="info">${r.username}</span>
+            <span class="score">${r.score}分</span>
+            <span class="time">${Math.floor(r.clear_time)}秒</span>
+          </div>
+        `;
+      }).join('');
+    }
+    showScreen('leaderboardScreen');
+  } catch (e) {
+    alert('获取榜单失败');
+  }
+}
+
 async function init() {
   loadProgress();
   showLogin(); // 先显示登录界面
@@ -1476,7 +1511,8 @@ function showGameOver(isVictory) {
       <p>用时：${Math.floor(clearTime)}秒</p>
       <p>本局获得：💎 +${WAVE_REWARDS.reduce((a,b)=>a+b,0)}</p>
       <p>生命剩余：${player.lives}条</p>
-      <p style="margin-top:15px;color:#ffff00;">💎 总分: ${finalScore}</p>
+      <p style="margin-top:15px;color:#ffff00;">⭐ 总分: ${finalScore}</p>
+      <button class="btn" onclick="showLeaderboardFromEnd()" style="margin-top:20px;">🏆 查看排行榜</button>
     `;
   } else {
     title.textContent = '💀 游戏结束';
@@ -1484,7 +1520,8 @@ function showGameOver(isVictory) {
     stats.innerHTML = `
       <p>到达波次：第${currentWave + 1}波</p>
       <p>本局获得：💎 +${WAVE_REWARDS.slice(0, currentWave + 1).reduce((a,b)=>a+b,0)}</p>
-      <p style="margin-top:15px;color:#ffff00;">💎 总分: ${finalScore}</p>
+      <p style="margin-top:15px;color:#ffff00;">⭐ 总分: ${finalScore}</p>
+      <button class="btn" onclick="showLeaderboardFromEnd()" style="margin-top:20px;">🏆 查看排行榜</button>
     `;
   }
   
