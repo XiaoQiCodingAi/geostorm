@@ -959,7 +959,7 @@ function showSkillSelect(waveReward) {
   showScreen('waveSelectScreen');
   document.getElementById('waveSelectScreen').classList.add('transparent');
   
-  document.getElementById('waveSelectTitle').textContent = `第 ${currentWave} 波完成！`;
+  document.getElementById('waveSelectTitle').textContent = `第 ${currentWave + 1} 波完成！`;
   document.getElementById('unlockedWeaponsDisplay').textContent = `💎 +${waveReward} 几何碎片`;
   
   // 随机选择3个技能
