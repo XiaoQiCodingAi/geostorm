@@ -473,10 +473,16 @@ const BULLET_RADIUS = 6;
 const FIRE_RATE = 14;
 const DAMAGE = 15;
 const ENEMY_TYPES = {
-  circle: { hp: 25, speed: 1.2, bulletSpeed: 1.5, radius: 15, score: 100, color: '#ff4444', fireRate: 90 },
-  square: { hp: 60, speed: 1.0, bulletSpeed: 1.8, radius: 18, score: 250, color: '#ff8844', fireRate: 80 },
-  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 2.2, radius: 22, score: 500, color: '#aa44ff', fireRate: 75 },
-  chaser: { hp: 50, speed: 0.8, bulletSpeed: 0, radius: 18, score: 300, color: '#ff00ff', fireRate: 0, dash:true }
+  // 圆形：脉冲型 - 发射冲击波而非子弹
+  circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff4444', fireRate: 120, attackType: 'pulse' },
+  // 方形：炮台式 - 定向双发炮弹
+  square: { hp: 60, speed: 1.0, bulletSpeed: 2.5, radius: 18, score: 250, color: '#ff8844', fireRate: 90, attackType: 'cannon' },
+  // 六边形：弹幕型 - 螺旋发射多发子弹
+  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 2.0, radius: 22, score: 500, color: '#aa44ff', fireRate: 60, attackType: 'spiral' },
+  // 追踪者：刺客型 - 冲刺攻击
+  chaser: { hp: 40, speed: 2.5, bulletSpeed: 0, radius: 18, score: 300, color: '#44ff88', fireRate: 180, attackType: 'dash' },
+  // 精英：全能型 - 组合攻击
+  elite: { hp: 150, speed: 1.0, bulletSpeed: 2.0, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
 };
 
 const BOSS_HP = 3000;
@@ -526,26 +532,26 @@ const DROP_TABLE = [
 
 // 10波次设计
 const ROGUE_WAVES = [
-  // Wave 1
-  { enemies: [{type:'circle', count:8}], eliteChance: 0 },
-  // Wave 2
-  { enemies: [{type:'circle',count:6},{type:'square',count:3}], eliteChance: 0 },
-  // Wave 3 (散弹解锁)
-  { enemies: [{type:'circle',count:5},{type:'square',count:4},{type:'chaser',count:5}], eliteChance: 0, unlockWeapon:'scatter' },
-  // Wave 4
-  { enemies: [{type:'circle',count:4},{type:'square',count:5},{type:'chaser',count:8},{type:'hexagon',count:2}], eliteChance: 0.1 },
-  // Wave 5 Boss
-  { enemies: [{type:'square',count:3},{type:'chaser',count:4},{type:'hexagon',count:3}], isBoss: true, eliteChance: 0.2, unlockWeapon:'laser' },
-  // Wave 6
-  { enemies: [{type:'square',count:6},{type:'chaser',count:10},{type:'hexagon',count:5}], eliteChance: 0.25 },
-  // Wave 7 (穿透解锁)
-  { enemies: [{type:'square',count:5},{type:'chaser',count:12},{type:'hexagon',count:6},{type:'elite',count:2}], eliteChance: 0, unlockWeapon:'pierce' },
-  // Wave 8
-  { enemies: [{type:'chaser',count:8},{type:'hexagon',count:8},{type:'elite',count:4}], eliteChance: 0.35 },
-  // Wave 9
-  { enemies: [{type:'hexagon',count:10},{type:'elite',count:6}], eliteChance: 0.4 },
-  // Wave 10 Boss (冰冻解锁)
-  { enemies: [{type:'hexagon',count:6},{type:'elite',count:8}], isBoss: true, eliteChance: 0.5, unlockWeapon:'freeze' },
+  // Wave 1: 教程波 - 纯圆形
+  { enemies: [{type:'circle', count:15}], eliteChance: 0 },
+  // Wave 2: 引入方形
+  { enemies: [{type:'circle',count:10},{type:'square',count:5}], eliteChance: 0 },
+  // Wave 3: 引入追踪者，解锁散弹
+  { enemies: [{type:'circle',count:8},{type:'square',count:6},{type:'chaser',count:5}], eliteChance: 0, unlockWeapon:'scatter' },
+  // Wave 4: 引入六边形
+  { enemies: [{type:'circle',count:6},{type:'square',count:8},{type:'chaser',count:8},{type:'hexagon',count:3}], eliteChance: 0.15 },
+  // Wave 5: BOSS阶段
+  { enemies: [{type:'circle',count:5},{type:'square',count:5},{type:'chaser',count:5},{type:'hexagon',count:5}], isBoss: true, eliteChance: 0.2, unlockWeapon:'laser' },
+  // Wave 6: 精英开始出现
+  { enemies: [{type:'square',count:10},{type:'chaser',count:12},{type:'hexagon',count:6},{type:'elite',count:3}], eliteChance: 0 },
+  // Wave 7: 引入精英，解锁穿透
+  { enemies: [{type:'chaser',count:15},{type:'hexagon',count:10},{type:'elite',count:5}], eliteChance: 0, unlockWeapon:'pierce' },
+  // Wave 8: 高难度混合
+  { enemies: [{type:'hexagon',count:12},{type:'elite',count:8},{type:'chaser',count:8}], eliteChance: 0 },
+  // Wave 9: 地狱难度
+  { enemies: [{type:'hexagon',count:10},{type:'elite',count:12}], eliteChance: 0 },
+  // Wave 10: 最终BOSS
+  { enemies: [{type:'hexagon',count:6},{type:'elite',count:8},{type:'chaser',count:8}], isBoss: true, eliteChance: 0, unlockWeapon:'freeze' },
 ];
 
 const WAVE_REWARDS = [5, 8, 12, 15, 30, 18, 22, 25, 30, 100];
@@ -795,6 +801,7 @@ function spawnBoss() {
 }
 
 let bossWarningFlash = 0;
+let pulses = []; // 脉冲波（圆形敌人的攻击）
 
 function updateWaveSpawning() {
   if (gameState !== 'playing') return;
@@ -1083,12 +1090,60 @@ function fireEnemyBullet(enemy) {
   const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
   const speed = enemy.bulletSpeed * enemy.bulletMult;
   
-  if (enemy.type === 'square') {
-    enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.35) * speed, vy: Math.sin(angle - 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
-    enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.35) * speed, vy: Math.sin(angle + 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
-  } else if (enemy.type === 'hexagon') {
-    for (let i = -2; i <= 2; i++) {
-      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + i * 0.5) * speed, vy: Math.sin(angle + i * 0.5) * speed, radius: 5, color: enemy.color, grazed: false });
+  // 根据攻击类型发射
+  switch (enemy.attackType) {
+    case 'pulse':
+      // 圆形：发射脉冲波
+      pulses.push({ x: enemy.x, y: enemy.y, radius: enemy.radius, maxRadius: 150, speed: 3, damage: 1, hit: false });
+      break;
+    case 'cannon':
+      // 方形：双发定向炮弹
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.25) * speed, vy: Math.sin(angle - 0.25) * speed, radius: 6, color: enemy.color, grazed: false });
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.25) * speed, vy: Math.sin(angle + 0.25) * speed, radius: 6, color: enemy.color, grazed: false });
+      break;
+    case 'spiral':
+      // 六边形：螺旋弹幕6发
+      const spiralOffset = enemy.spiralAngle || 0;
+      for (let i = 0; i < 6; i++) {
+        const a = angle + spiralOffset + (i / 6) * Math.PI * 2;
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, radius: 5, color: enemy.color, grazed: false });
+      }
+      enemy.spiralAngle = (spiralOffset + 0.3) % (Math.PI * 2);
+      break;
+    case 'combo':
+      // 精英：炮台+偶尔冲刺
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 7, color: enemy.color, grazed: false });
+      if (Math.random() < 0.3) {
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.4) * speed, vy: Math.sin(angle - 0.4) * speed, radius: 5, color: enemy.color, grazed: false });
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.4) * speed, vy: Math.sin(angle + 0.4) * speed, radius: 5, color: enemy.color, grazed: false });
+      }
+      break;
+  }
+}
+
+function updatePulses() {
+  for (let i = pulses.length - 1; i >= 0; i--) {
+    const p = pulses[i];
+    p.radius += p.speed;
+    
+    // 检测脉冲是否击中玩家
+    if (!p.hit) {
+      const dist = Math.hypot(player.x - p.x, player.y - p.y);
+      // 脉冲的伤害区域是半径附近（宽5px的环）
+      if (Math.abs(dist - p.radius) < 10 && player.invincible === 0) {
+        player.lives--;
+        player.invincible = INVINCIBLE_FRAMES;
+        p.hit = true;
+        if (player.lives <= 0) {
+          gameState = 'gameover'; clearTime = gameTime; finalScore = calculateFinalScoreGameOver();
+          showGameOver(false);
+        }
+      }
+    }
+    
+    // 移除超出范围的脉冲
+    if (p.radius > p.maxRadius) {
+      pulses.splice(i, 1);
     }
   }
 }
@@ -1513,6 +1568,14 @@ function render() {
   // Enemy bullets
   enemyBullets.forEach(b => { ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill(); });
   
+  // Circle pulse waves (render as translucent rings)
+  pulses.forEach(p => {
+    const alpha = 1 - (p.radius / p.maxRadius);
+    ctx.strokeStyle = `rgba(255, 68, 68, ${alpha})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.stroke();
+  });
+  
   // Player bullets
   playerBullets.forEach(b => { ctx.fillStyle = player.jSkillActive ? '#ffff00' : '#00ffff'; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill(); });
   
@@ -1703,6 +1766,7 @@ function gameLoop(timestamp) {
       updateEnemies();
       updateBoss();
       updateKWave();
+      updatePulses();
       checkCollisions();
       updateBullets();
       updateParticles();
