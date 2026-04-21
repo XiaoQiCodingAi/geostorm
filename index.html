@@ -448,7 +448,7 @@ async function showMyRecords() {
           <span class="rank">#${i+1}</span>
           <span class="info">${new Date(r.created_at).toLocaleString('zh-CN')}</span>
           <span class="score">${r.score}分</span>
-          <span class="time">${Math.floor(r.clear_time)}秒</span>
+          <span class="time">${r.clear_time ? Math.floor(r.clear_time) + "秒" : "-"}</span>
         </div>
       `).join('');
     }
@@ -477,7 +477,7 @@ async function showLeaderboard() {
             <span class="rank">${['🥇','🥈','🥉'][i] || (i+1)+'.'}</span>
             <span class="info">${r.username}</span>
             <span class="score">${r.score}分</span>
-            <span class="time">${Math.floor(r.clear_time)}秒</span>
+            <span class="time">${r.clear_time ? Math.floor(r.clear_time) + "秒" : "-"}</span>
           </div>
         `;
       }).join('');
@@ -512,7 +512,7 @@ async function showLeaderboardFromEnd() {
             <span class="rank">${['🥇','🥈','🥉'][i] || (i+1)+'.'}</span>
             <span class="info">${r.username}</span>
             <span class="score">${r.score}分</span>
-            <span class="time">${Math.floor(r.clear_time)}秒</span>
+            <span class="time">${r.clear_time ? Math.floor(r.clear_time) + "秒" : "-"}</span>
           </div>
         `;
       }).join('');
@@ -1526,7 +1526,7 @@ function showGameOver(isVictory) {
   }
   
   // 提交分数到排行榜
-  submitScore(finalScore, isVictory ? clearTime : null);
+  submitScore(finalScore, clearTime);
 }
 
 async function submitScore(finalScore, clearTime) {
