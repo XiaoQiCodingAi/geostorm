@@ -507,16 +507,20 @@ const BULLET_RADIUS = 6;
 const FIRE_RATE = 14;
 const DAMAGE = 15;
 const ENEMY_TYPES = {
-  // 圆形：脉冲型 - 发射冲击波而非子弹
+  // 三角形：三角箭 - 1正中+2侧角±20°
+  triangle: { hp: 30, speed: 1.2, bulletSpeed: 3.5, radius: 16, score: 150, color: '#ff6644', fireRate: 80, attackType: 'triangle' },
+  // 四边形：四角弹 - 朝四个角发射
+  square: { hp: 60, speed: 1.0, bulletSpeed: 3.0, radius: 18, score: 250, color: '#ff8844', fireRate: 100, attackType: 'square' },
+  // 圆形：脉冲型 - 扩散脉冲环
   circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff4444', fireRate: 120, attackType: 'pulse' },
-  // 方形：炮台式 - 定向双发炮弹
-  square: { hp: 60, speed: 1.0, bulletSpeed: 2.5, radius: 18, score: 250, color: '#ff8844', fireRate: 90, attackType: 'cannon' },
-  // 六边形：弹幕型 - 螺旋发射多发子弹
-  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 2.0, radius: 22, score: 500, color: '#aa44ff', fireRate: 60, attackType: 'spiral' },
-  // 追踪者：刺客型 - 冲刺攻击
+  // 五边形：五连星 - 5发间隔0.3秒逐发
+  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 2.5, radius: 20, score: 400, color: '#44ffaa', fireRate: 90, attackType: 'pentagon' },
+  // 六边形：六芒脉冲 - 大脉冲+6发小弹
+  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 2.0, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
+  // 追踪者：蓄力冲刺
   chaser: { hp: 40, speed: 2.5, bulletSpeed: 0, radius: 18, score: 300, color: '#44ff88', fireRate: 180, attackType: 'dash' },
-  // 精英：全能型 - 组合攻击
-  elite: { hp: 150, speed: 1.0, bulletSpeed: 2.0, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
+  // 精英：组合攻击
+  elite: { hp: 150, speed: 1.0, bulletSpeed: 2.5, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
 };
 
 const BOSS_HP = 3000;
@@ -566,27 +570,31 @@ const DROP_TABLE = [
 
 // 10波次设计
 const ROGUE_WAVES = [
-  // Wave 1: 教程波 - 纯圆形
-  { enemies: [{type:'circle', count:15}], eliteChance: 0 },
-  // Wave 2: 引入方形
-  { enemies: [{type:'circle',count:10},{type:'square',count:5}], eliteChance: 0 },
-  // Wave 3: 引入追踪者，解锁散弹
-  { enemies: [{type:'circle',count:8},{type:'square',count:6},{type:'chaser',count:5}], eliteChance: 0, unlockWeapon:'scatter' },
-  // Wave 4: 引入六边形
-  { enemies: [{type:'circle',count:6},{type:'square',count:8},{type:'chaser',count:8},{type:'hexagon',count:3}], eliteChance: 0.15 },
-  // Wave 5: BOSS阶段
-  { enemies: [{type:'circle',count:5},{type:'square',count:5},{type:'chaser',count:5},{type:'hexagon',count:5}], isBoss: true, eliteChance: 0.2, unlockWeapon:'laser' },
-  // Wave 6: 精英开始出现
-  { enemies: [{type:'square',count:10},{type:'chaser',count:12},{type:'hexagon',count:6},{type:'elite',count:3}], eliteChance: 0 },
-  // Wave 7: 引入精英，解锁穿透
-  { enemies: [{type:'chaser',count:15},{type:'hexagon',count:10},{type:'elite',count:5}], eliteChance: 0, unlockWeapon:'pierce' },
-  // Wave 8: 高难度混合
-  { enemies: [{type:'hexagon',count:12},{type:'elite',count:8},{type:'chaser',count:8}], eliteChance: 0 },
-  // Wave 9: 地狱难度
-  { enemies: [{type:'hexagon',count:10},{type:'elite',count:12}], eliteChance: 0 },
-  // Wave 10: 最终BOSS
-  { enemies: [{type:'hexagon',count:6},{type:'elite',count:8},{type:'chaser',count:8}], isBoss: true, eliteChance: 0, unlockWeapon:'freeze' },
+  // Wave 1: 三角形教程
+  { enemies: [{type:'triangle', count:8}], eliteChance: 0 },
+  // Wave 2: 三角形 + 四边形
+  { enemies: [{type:'triangle',count:6},{type:'square',count:4}], eliteChance: 0 },
+  // Wave 3: + 圆形 + 精英×1
+  { enemies: [{type:'triangle',count:4},{type:'square',count:3},{type:'circle',count:3},{type:'elite',count:1}], eliteChance: 0 },
+  // Wave 4: + 五边形
+  { enemies: [{type:'square',count:4},{type:'circle',count:4},{type:'pentagon',count:3},{type:'elite',count:1}], eliteChance: 0 },
+  // Wave 5: BOSS + 混合
+  { enemies: [{type:'triangle',count:2},{type:'square',count:2},{type:'circle',count:2},{type:'pentagon',count:2},{type:'elite',count:1}], isBoss: true, eliteChance: 0, unlockWeapon:'laser' },
+  // Wave 6: 五边形 + 追踪者
+  { enemies: [{type:'pentagon',count:4},{type:'chaser',count:3},{type:'circle',count:3},{type:'elite',count:1}], eliteChance: 0 },
+  // Wave 7: 六边形 + 追踪者
+  { enemies: [{type:'hexagon',count:4},{type:'chaser',count:3},{type:'square',count:3},{type:'elite',count:1}], eliteChance: 0 },
+  // Wave 8: 五 + 六 + 精英×2
+  { enemies: [{type:'pentagon',count:3},{type:'hexagon',count:3},{type:'elite',count:2}], eliteChance: 0, unlockWeapon:'pierce' },
+  // Wave 9: 六 + 精英 + 追踪者
+  { enemies: [{type:'hexagon',count:4},{type:'elite',count:2},{type:'chaser',count:4}], eliteChance: 0 },
+  // Wave 10: 最终BOSS + 全敌人
+  { enemies: [{type:'triangle',count:2},{type:'square',count:2},{type:'pentagon',count:2},{type:'hexagon',count:2},{type:'elite',count:2}], isBoss: true, eliteChance: 0, unlockWeapon:'freeze' },
 ];
+
+// 精英同时存在上限
+const MAX_ELITE = 2;
+let activeEliteCount = 0;
 
 const WAVE_REWARDS = [5, 8, 12, 15, 30, 18, 22, 25, 30, 100];
 
@@ -694,7 +702,7 @@ function startGame() {
   currentWave = 0;
   waveEnemiesTotal = 0; waveEnemiesKilled = 0;
   waveSpawnQueue = []; waveSpawnTimer = 0;
-  boss = null;
+  activeEliteCount = 0; boss = null;
   
   activeSkills = [];
   skillStacks = {};
@@ -750,7 +758,7 @@ function showWaveSelect() {
   
   let enemyList = wave.enemies.map(e => {
     const cnt = e.count || 0;
-    const names = { circle: '圆形', square: '方形', hexagon: '六边形', chaser: '追踪者', elite: '精英' };
+    const names = { triangle: '三角形', square: '方形', circle: '圆形', pentagon: '五边形', hexagon: '六边形', chaser: '追踪者', elite: '精英' };
     return names[e.type] + '×' + cnt;
   }).join(' + ');
   
@@ -792,7 +800,7 @@ function startWaveFromSelect() {
 }
 
 function getRandomEnemyType() {
-  const types = ['circle', 'square', 'hexagon', 'chaser'];
+  const types = ['triangle', 'square', 'circle', 'pentagon', 'hexagon', 'chaser'];
   return types[Math.floor(Math.random() * types.length)];
 }
 
@@ -862,7 +870,16 @@ function updateWaveSpawning() {
         const e = waveSpawnQueue[i];
         let x, y, spawn;
         
-        if (e.type === 'circle' || e.type === 'hexagon') {
+        // 精英数量限制
+        if (e.isElite && activeEliteCount >= MAX_ELITE) {
+          break; // 跳过这个精英，等待前面的被消灭
+        }
+        
+        if (e.type === 'triangle' || e.type === 'pentagon') {
+          spawn = 'top';
+          x = 60 + Math.random() * (GAME_WIDTH - 120);
+          y = -20;
+        } else if (e.type === 'circle' || e.type === 'hexagon') {
           spawn = 'top';
           x = 60 + Math.random() * (GAME_WIDTH - 120);
           y = -20;
@@ -874,9 +891,16 @@ function updateWaveSpawning() {
           spawn = Math.random() < 0.5 ? 'left' : 'right';
           x = spawn === 'left' ? -20 : GAME_WIDTH + 20;
           y = 60 + Math.random() * (GAME_HEIGHT - 180);
+        } else if (e.type === 'elite') {
+          // 精英从顶部或两侧出现
+          const side = Math.floor(Math.random() * 3);
+          if (side === 0) { x = 60 + Math.random() * (GAME_WIDTH - 120); y = -20; }
+          else if (side === 1) { x = -20; y = 60 + Math.random() * (GAME_HEIGHT - 180); }
+          else { x = GAME_WIDTH + 20; y = 60 + Math.random() * (GAME_HEIGHT - 180); }
         }
         
         spawnEnemy(e.type, x, y, e.isElite);
+        if (e.isElite) activeEliteCount++;
         e.spawned = true;
         break;
       }
@@ -1062,6 +1086,12 @@ function updateEnemies() {
         e.x += (dx / dist) * e.speed * trackStrength;
         e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
         if (e.type === 'circle') e.y = Math.min(e.y, GAME_HEIGHT * 0.7);
+      } else if (e.type === 'triangle' || e.type === 'pentagon') {
+        e.movePhase += 0.03;
+        e.y += e.speed * 0.8;
+        e.x += (dx / dist) * e.speed * 0.3;
+        e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
+        e.y = Math.min(e.y, GAME_HEIGHT * 0.7);
       } else if (e.type === 'square') { 
         e.movePhase += 0.05; 
         e.x += e.speed * 0.7; 
@@ -1123,9 +1153,10 @@ function updateEnemies() {
       const energyGain = getEnergyGain();
       player.energy = Math.min(getMaxEnergy(), player.energy + energyGain);
       
-      // Elite drop
+      // Elite drop & count
       if (e.isElite) {
         spawnDrop(e.x, e.y);
+        activeEliteCount = Math.max(0, activeEliteCount - 1);
       }
       
       waveEnemiesKilled++;
@@ -1150,38 +1181,59 @@ function fireEnemyBullet(enemy) {
   
   // 根据攻击类型发射
   switch (enemy.attackType) {
+    case 'triangle':
+      // 三角形：三角箭 - 1正中+2侧角±20°
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 6, color: enemy.color, grazed: false });
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.35) * speed, vy: Math.sin(angle - 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
+      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.35) * speed, vy: Math.sin(angle + 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
+      break;
+    case 'square':
+      // 四边形：四角弹 - 朝四个角发射
+      const corners = [
+        { x: 0, y: 0 }, { x: GAME_WIDTH, y: 0 },
+        { x: 0, y: GAME_HEIGHT }, { x: GAME_WIDTH, y: GAME_HEIGHT }
+      ];
+      corners.forEach(c => {
+        const a = Math.atan2(c.y - enemy.y, c.x - enemy.x);
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, radius: 6, color: enemy.color, grazed: false });
+      });
+      break;
     case 'pulse':
       // 圆形：发射脉冲波
       pulses.push({ x: enemy.x, y: enemy.y, radius: enemy.radius, maxRadius: 150, speed: 3, damage: 1, hit: false });
       break;
-    case 'cannon':
-      // 方形：双发定向炮弹
-      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.25) * speed, vy: Math.sin(angle - 0.25) * speed, radius: 6, color: enemy.color, grazed: false });
-      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.25) * speed, vy: Math.sin(angle + 0.25) * speed, radius: 6, color: enemy.color, grazed: false });
+    case 'pentagon':
+      // 五边形：五连星 - 5发间隔0.3秒逐发（用fireTimer模拟间隔）
+      enemy.pentagonCount = (enemy.pentagonCount || 0) + 1;
+      if (enemy.pentagonCount <= 5) {
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 6, color: enemy.color, grazed: false });
+      }
+      if (enemy.pentagonCount >= 5) {
+        enemy.pentagonCount = 0; // 重置，准备下一轮
+      }
       break;
-    case 'spiral':
-      // 六边形：螺旋弹幕+蓄力冲击波
-      const spiralOffset = enemy.spiralAngle || 0;
-      // 螺旋弹幕
+    case 'hexagon':
+      // 六边形：六芒脉冲 - 大脉冲+6发小弹
+      // 6发小弹
+      const hexOffset = enemy.spiralAngle || 0;
       for (let i = 0; i < 6; i++) {
-        const a = angle + spiralOffset + (i / 6) * Math.PI * 2;
+        const a = angle + hexOffset + (i / 6) * Math.PI * 2;
         enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, radius: 5, color: enemy.color, grazed: false });
       }
-      enemy.spiralAngle = (spiralOffset + 0.3) % (Math.PI * 2);
-      // 蓄力冲击波（每3次攻击一次）
+      enemy.spiralAngle = (hexOffset + 0.3) % (Math.PI * 2);
+      // 大脉冲（每3次攻击一次）
       enemy.chargeCount = (enemy.chargeCount || 0) + 1;
       if (enemy.chargeCount >= 3) {
         enemy.chargeCount = 0;
-        // 添加一个蓄力脉冲，在屏幕上扩散
-        pulses.push({ x: enemy.x, y: enemy.y, radius: enemy.radius, maxRadius: 200, speed: 4, damage: 1, hit: false, isCharge: true, color: enemy.color });
+        pulses.push({ x: enemy.x, y: enemy.y, radius: enemy.radius, maxRadius: 180, speed: 3.5, damage: 1, hit: false, isCharge: true, color: enemy.color });
       }
       break;
     case 'combo':
-      // 精英：炮台+偶尔冲刺
+      // 精英：炮台+偶尔三连发
       enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 7, color: enemy.color, grazed: false });
       if (Math.random() < 0.3) {
-        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.4) * speed, vy: Math.sin(angle - 0.4) * speed, radius: 5, color: enemy.color, grazed: false });
-        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.4) * speed, vy: Math.sin(angle + 0.4) * speed, radius: 5, color: enemy.color, grazed: false });
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.3) * speed, vy: Math.sin(angle - 0.3) * speed, radius: 5, color: enemy.color, grazed: false });
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.3) * speed, vy: Math.sin(angle + 0.3) * speed, radius: 5, color: enemy.color, grazed: false });
       }
       break;
   }
@@ -1765,6 +1817,30 @@ function render() {
       ctx.fillStyle = e.color;
       ctx.beginPath(); ctx.moveTo(e.x, e.y);
       ctx.arc(e.x, e.y, e.radius, -Math.PI / 2, -Math.PI / 2 + hpAngle); ctx.closePath(); ctx.fill();
+    } else if (e.type === 'triangle') {
+      ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.movePhase);
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.beginPath();
+      for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); }
+      ctx.closePath(); ctx.stroke();
+      ctx.fillStyle = e.color; ctx.beginPath();
+      const segT = Math.ceil(hpRatio * 3);
+      for (let i = 0; i < segT; i++) { const a = (i / 3) * Math.PI * 2 - Math.PI / 2; if (i === 0) ctx.moveTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); else ctx.lineTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); }
+      if (segT > 0 && segT < 3) { const actualAngle = hpRatio * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(actualAngle) * e.radius, Math.sin(actualAngle) * e.radius); }
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    } else if (e.type === 'pentagon') {
+      ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.movePhase);
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); }
+      ctx.closePath(); ctx.stroke();
+      ctx.fillStyle = e.color; ctx.beginPath();
+      const segP = Math.ceil(hpRatio * 5);
+      for (let i = 0; i < segP; i++) { const a = (i / 5) * Math.PI * 2 - Math.PI / 2; if (i === 0) ctx.moveTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); else ctx.lineTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); }
+      if (segP > 0 && segP < 5) { const actualAngle = hpRatio * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(actualAngle) * e.radius, Math.sin(actualAngle) * e.radius); }
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
     } else if (e.type === 'square') {
       ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.movePhase);
       ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.strokeRect(-e.radius, -e.radius, e.radius * 2, e.radius * 2);
