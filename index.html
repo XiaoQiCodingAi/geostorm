@@ -1023,12 +1023,18 @@ function updateEnemies() {
       }
       
       if (e.isDashing) {
+        // 冲刺拖尾效果
+        for (let t = 0; t < 3; t++) {
+          particles.push({ x: e.x + (Math.random() - 0.5) * 10, y: e.y + (Math.random() - 0.5) * 10, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, life: 15, color: '#44ff88', size: 6 });
+        }
         e.x += e.dashVx;
         e.y += e.dashVy;
         e.dashDuration--;
         if (e.dashDuration <= 0) {
           e.isDashing = false;
           e.dashTimer = 180 + Math.random() * 120;
+          // 冲刺结束能量爆发
+          pulses.push({ x: e.x, y: e.y, radius: e.radius, maxRadius: 80, speed: 3, damage: 0, hit: false, isCharge: false, color: '#44ff88' });
         }
       }
       if (e.dashWarning > 0) e.dashWarning--;
