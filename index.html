@@ -525,9 +525,9 @@ const ENEMY_TYPES = {
   // 四边形：四角弹 - 朝四个角发射
   square: { hp: 60, speed: 1.0, bulletSpeed: 2.0, radius: 18, score: 250, color: '#ffaa22', fireRate: 100, attackType: 'square' },
   // 圆形：脉冲型 - 扩散脉冲环
-  circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff4444', fireRate: 120, attackType: 'pulse' },
+  circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff44aa', fireRate: 120, attackType: 'pulse' },
   // 五边形：五连星 - 5发间隔0.3秒逐发
-  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#44ffaa', fireRate: 90, attackType: 'pentagon' },
+  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#00ddff', fireRate: 90, attackType: 'pentagon' },
   // 六边形：六芒脉冲 - 大脉冲+6发小弹
   hexagon: { hp: 100, speed: 0.8, bulletSpeed: 1.5, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
   // 追踪者：蓄力冲刺
@@ -567,13 +567,13 @@ const ALL_SKILLS = [
 
 // 掉落表（临时武器buff）
 const DROP_TABLE = [
-  { id: 'energy', name: '能量球', icon: '⚡', desc: '+50能量', weight: 20 },
-  { id: 'scatterBuff', name: '散弹', icon: '🔷', desc: '60秒散弹', weight: 15 },
-  { id: 'pierceBuff', name: '穿透', icon: '🔷', desc: '60秒穿透弹', weight: 15 },
-  { id: 'chargeBuff', name: '蓄力弹', icon: '⚡', desc: '60秒蓄力弹', weight: 15 },
-  { id: 'meleeBuff', name: '光刀', icon: '⚔️', desc: '60秒光刀', weight: 15 },
-  { id: 'shield', name: '护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 10 },
-  { id: 'heal', name: '生命恢复', icon: '❤️', desc: '恢复1条生命', weight: 10 },
+  { id: 'energy', name: '💥能量', icon: '⚡', desc: '+50能量', weight: 20 },
+  { id: 'scatterBuff', name: '🔫散弹', icon: '🔫', desc: '60秒散弹发射', weight: 15 },
+  { id: 'pierceBuff', name: '➡️穿透', icon: '➡️', desc: '60秒穿透弹', weight: 15 },
+  { id: 'chargeBuff', name: '⚡蓄力', icon: '⚡', desc: '60秒蓄力炮弹', weight: 15 },
+  { id: 'meleeBuff', name: '⚔️光刀', icon: '⚔️', desc: '60秒旋转光刀', weight: 15 },
+  { id: 'shield', name: '🛡️护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 10 },
+  { id: 'heal', name: '❤️治疗', icon: '❤️', desc: '恢复1条生命', weight: 10 },
 ];
 
 // 掉落在场上的道具
@@ -2133,8 +2133,11 @@ function render() {
     ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 15;
     // 大号图标
     ctx.font = '36px Arial';
-    ctx.fillText(drop.icon, drop.x, drop.y + bobY);
+    ctx.fillText(drop.icon, drop.x, drop.y + bobY - 10);
     ctx.shadowBlur = 0;
+    // 名称标签
+    ctx.font = 'bold 12px Courier New'; ctx.fillStyle = '#ffff00';
+    ctx.fillText(drop.name, drop.x, drop.y + bobY + 25);
     // 闪光粒子
     const sparkleCount = 4;
     for (let i = 0; i < sparkleCount; i++) {
