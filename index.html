@@ -775,7 +775,7 @@ function showWaveSelect() {
 function startWaveFromSelect() {
   gameState = 'playing';
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  console.log('startWaveFromSelect called, player:', player.x, player.y, player.radius);
+
   
   const wave = ROGUE_WAVES[currentWave];
   
@@ -1731,7 +1731,6 @@ function updateParticles() {
 }
 
 function render() {
-  if (frameCount === 0) console.log('render called, gameState:', gameState, 'player:', player);
   ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
   ctx.fillStyle = '#ffffff';
   for (let i = 0; i < 50; i++) { ctx.fillRect((i * 73 + frameCount * 0.1) % GAME_WIDTH, (i * 97 + frameCount * 0.05) % GAME_HEIGHT, 1, 1); }
