@@ -727,7 +727,6 @@ function getRandomEnemyType() {
   return types[Math.floor(Math.random() * types.length)];
 }
 
-function back
 function backToMenuFromGame() {
   if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
   gameState = 'idle';
