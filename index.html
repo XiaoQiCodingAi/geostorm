@@ -701,7 +701,7 @@ function showWaveSelect() {
 
 function startWaveFromSelect() {
   gameState = 'playing';
-  showScreen('menuScreen'); // hide menus
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   
   const wave = ROGUE_WAVES[currentWave];
   
