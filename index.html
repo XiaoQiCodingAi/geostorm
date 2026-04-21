@@ -1647,7 +1647,8 @@ function checkCollisions() {
     for (let j = enemies.length - 1; j >= 0; j--) {
       if (Math.hypot(b.x - enemies[j].x, b.y - enemies[j].y) < b.radius + enemies[j].radius) {
         enemies[j].hp -= b.damage;
-        floatingTexts.push({ x: enemies[j].x, y: enemies[j].y - 20, text: b.damage.toString(), life: 30, color: '#ffff00' });
+        const dmgText = b.damage % 1 === 0 ? b.damage.toString() : b.damage.toFixed(2).replace(/\.?0+$/, '');
+        floatingTexts.push({ x: enemies[j].x, y: enemies[j].y - 20, text: dmgText, life: 30, color: '#ffff00' });
         if (b.pierce) continue;
         hit = true;
         break;
@@ -1658,7 +1659,8 @@ function checkCollisions() {
     if (!hit && boss && boss.hp > 0) {
       if (Math.hypot(b.x - boss.x, b.y - boss.y) < b.radius + boss.radius) {
         boss.hp -= b.damage;
-        floatingTexts.push({ x: boss.x, y: boss.y - 40, text: b.damage.toString(), life: 30, color: '#ff66aa' });
+        const bossDmgText = b.damage % 1 === 0 ? b.damage.toString() : b.damage.toFixed(2).replace(/\.?0+$/, '');
+        floatingTexts.push({ x: boss.x, y: boss.y - 40, text: bossDmgText, life: 30, color: '#ff66aa' });
         player.energy = Math.min(getMaxEnergy(), player.energy + ENERGY_PER_KILL * 0.5);
         hit = true;
       }
