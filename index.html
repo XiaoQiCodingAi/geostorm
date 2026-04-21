@@ -444,11 +444,14 @@ async function showLeaderboard() {
 
 async function init() {
   loadProgress();
-  const valid = await verifyToken();
-  if (valid) {
-    showMenu();
-  } else {
-    showLogin();
+  showLogin(); // 先显示登录界面
+  try {
+    const valid = await verifyToken();
+    if (valid) {
+      showMenu();
+    }
+  } catch (e) {
+    // API 失败也显示登录界面
   }
 }
 
