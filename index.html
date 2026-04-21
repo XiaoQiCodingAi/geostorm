@@ -1571,7 +1571,12 @@ function updatePlayerShooting() {
         if (target) {
           const angle = Math.atan2(target.y - player.y, target.x - player.x);
           const damage = DAMAGE * 3; // 3倍伤害
-          playerBullets.push({ x: player.x, y: player.y, vx: Math.cos(angle) * BULLET_SPEED * 1.5, vy: Math.sin(angle) * BULLET_SPEED * 1.5, radius: 10, damage: damage, target: null });
+          // 发射时有闪光特效
+          for (let i = 0; i < 8; i++) {
+            const a = (i / 8) * Math.PI * 2;
+            particles.push({ x: player.x, y: player.y, vx: Math.cos(a) * 3, vy: Math.sin(a) * 3, life: 20, color: '#ffff00', size: 6 });
+          }
+          playerBullets.push({ x: player.x, y: player.y, vx: Math.cos(angle) * BULLET_SPEED * 1.5, vy: Math.sin(angle) * BULLET_SPEED * 1.5, radius: 10, damage: damage, target: null, isCharge: true });
         }
       }
       return;
@@ -1886,7 +1891,21 @@ function render() {
   });
   
   // Player bullets
-  playerBullets.forEach(b => { ctx.fillStyle = player.jSkillActive ? '#ffff00' : '#00ffff'; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill(); });
+  playerBullets.forEach(b => {
+    if (b.isCharge) {
+      // 蓄力弹特效
+      ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 20;
+      ctx.fillStyle = '#ffff00';
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      // 外圈光晕
+      ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.radius * 1.5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.fillStyle = player.jSkillActive ? '#ffff00' : '#00ffff';
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill();
+    }
+  });
   
   // Enemies
   enemies.forEach(e => {
@@ -2109,8 +2128,22 @@ function render() {
   activeDrops.forEach(drop => {
     drop.bobPhase += 0.08;
     const bobY = Math.sin(drop.bobPhase) * 5;
-    ctx.font = '28px Arial';
+    // 发光效果
+    ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 15;
+    // 大号图标
+    ctx.font = '36px Arial';
     ctx.fillText(drop.icon, drop.x, drop.y + bobY);
+    ctx.shadowBlur = 0;
+    // 闪光粒子
+    const sparkleCount = 4;
+    for (let i = 0; i < sparkleCount; i++) {
+      const angle = (i / sparkleCount) * Math.PI * 2 + drop.bobPhase;
+      const dist = 25 + Math.sin(drop.bobPhase * 2 + i) * 5;
+      const sx = drop.x + Math.cos(angle) * dist;
+      const sy = drop.y + bobY + Math.sin(angle) * dist;
+      ctx.fillStyle = '#ffff88';
+      ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2); ctx.fill();
+    }
   });
   
   // Shield
