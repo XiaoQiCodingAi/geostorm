@@ -490,11 +490,6 @@ async function showLeaderboard() {
 
 async function showLeaderboardFromEnd() {
   await showLeaderboard();
-  // 修改返回按钮返回游戏结束界面
-  const btn = document.querySelector('#leaderboardScreen .btn');
-  if (btn) {
-    btn.onclick = () => showScreen('gameOverScreen');
-  }
 }
 
 async function init() {
@@ -1546,6 +1541,7 @@ function showGameOver(isVictory) {
 
 async function submitScore(finalScore, clearTime) {
   if (!authToken) return;
+  console.log('submitScore:', { finalScore, clearTime });
   try {
     await fetch(API_BASE + '/scores', {
       method: 'POST',
