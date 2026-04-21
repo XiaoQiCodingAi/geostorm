@@ -1191,10 +1191,13 @@ function fireEnemyBullet(enemy) {
   // 根据攻击类型发射
   switch (enemy.attackType) {
     case 'triangle':
-      // 三角形：三角箭 - 1正中+2侧角±15°（箭头形状朝玩家）
+      // 三角形：箭头形状 - 2发尾翼在尖头后面，形成V字
+      // 尾翼子弹（位置靠后，角度展开）
+      const backOffset = 10;
+      enemyBullets.push({ x: enemy.x - Math.cos(angle - 0.35) * backOffset, y: enemy.y - Math.sin(angle - 0.35) * backOffset, vx: Math.cos(angle - 0.35) * speed, vy: Math.sin(angle - 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
+      enemyBullets.push({ x: enemy.x - Math.cos(angle + 0.35) * backOffset, y: enemy.y - Math.sin(angle + 0.35) * backOffset, vx: Math.cos(angle + 0.35) * speed, vy: Math.sin(angle + 0.35) * speed, radius: 5, color: enemy.color, grazed: false });
+      // 尖头子弹（最前）
       enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 6, color: enemy.color, grazed: false });
-      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle - 0.26) * speed, vy: Math.sin(angle - 0.26) * speed, radius: 5, color: enemy.color, grazed: false });
-      enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.26) * speed, vy: Math.sin(angle + 0.26) * speed, radius: 5, color: enemy.color, grazed: false });
       break;
     case 'square':
       // 四边形：四角弹 - 朝四个角发射
