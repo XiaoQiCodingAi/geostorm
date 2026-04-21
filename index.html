@@ -233,6 +233,13 @@ input:focus { outline: none; border-color: #00ffff; }
   <button class="btn secondary" onclick="backToMenu()">返回主菜单</button>
 </div>
 
+<!-- 暂停界面 -->
+<div id="pauseScreen" class="screen">
+  <h2>⏸️ 暂停</h2>
+  <button class="btn" onclick="resumeGame()">继续游戏</button>
+  <button class="btn secondary" onclick="backToMenu()">返回主菜单</button>
+</div>
+
 <script>
 // ==================== API ====================
 const API_BASE = '/api/geostorm';
@@ -370,6 +377,8 @@ function showMenu() {
 }
 
 function backToMenu() { showMenu(); }
+
+function resumeGame() { gameState = 'playing'; showScreen(null); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); }
 
 function showHelp() { showScreen('helpScreen'); }
 
@@ -666,9 +675,9 @@ document.addEventListener('keydown', (e) => {
   } else if (gameState === 'playing') {
     if (e.code === 'KeyJ') { jPressed = true; e.preventDefault(); }
     if (e.code === 'KeyK') { tryScreenClear(); }
-    if (e.code === 'Escape' || e.code === 'KeyP') { gameState = 'paused'; }
+    if (e.code === 'Escape' || e.code === 'KeyP') { gameState = 'paused'; showScreen('pauseScreen'); }
   } else if (gameState === 'paused') {
-    if (e.code === 'Escape' || e.code === 'KeyP') { gameState = 'playing'; }
+    if (e.code === 'Escape' || e.code === 'KeyP') { gameState = 'playing'; showScreen(null); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); }
   }
 });
 
