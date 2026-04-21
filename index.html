@@ -1045,13 +1045,6 @@ function updateEnemies() {
       }
       score += e.score;
       
-      // Death bullets (circle=0, others reduced)
-      const deathBulletCount = e.type === 'circle' ? 0 : e.type === 'square' ? 1 : e.type === 'hexagon' ? 2 : e.type === 'chaser' ? 4 : 0;
-      for (let j = 0; j < deathBulletCount; j++) {
-        const angle = Math.atan2(player.y - e.y, player.x - e.x) + (j - (deathBulletCount - 1) / 2) * 0.4;
-        enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3, radius: 4, color: e.color, grazed: false });
-      }
-      
       // Energy gain
       const energyGain = getEnergyGain();
       player.energy = Math.min(getMaxEnergy(), player.energy + energyGain);
