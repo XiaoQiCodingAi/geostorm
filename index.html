@@ -881,8 +881,14 @@ function spawnEnemy(type, x, y, isElite) {
 }
 
 function spawnBoss() {
-  boss = { x: GAME_WIDTH / 2, y: -60, hp: BOSS_HP, maxHp: BOSS_HP, radius: BOSS_RADIUS,
-    color: '#ff66aa', phase: 1, fireTimer: 0, moveTimer: 0, moveAngle: 0, warningTimer: 120, entered: false };
+  const isFinal = currentWave === 9; // Wave 10 = index 9
+  const bossColor = isFinal ? '#ff2222' : '#ff66aa'; // 红色是最终BOSS
+  const bossRadius = isFinal ? 45 : BOSS_RADIUS;
+  const bossHp = isFinal ? BOSS_HP * 1.5 : BOSS_HP;
+  
+  boss = { x: GAME_WIDTH / 2, y: -60, hp: bossHp, maxHp: bossHp, radius: bossRadius,
+    color: bossColor, phase: 1, fireTimer: 0, moveTimer: 0, moveAngle: 0, warningTimer: 120, entered: false,
+    isFinal: isFinal };
   bossWarningFlash = 120;
 }
 
@@ -1921,9 +1927,32 @@ function render() {
   // Boss
   if (boss) {
     const hpRatio = boss.hp / boss.maxHp;
+    
+    // 最终BOSS有特殊光环效果
+    if (boss.isFinal) {
+      // 外层旋转光环
+      ctx.save(); ctx.translate(boss.x, boss.y);
+      ctx.rotate(frameCount * 0.02);
+      ctx.strokeStyle = 'rgba(255, 34, 34, 0.3)';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, boss.radius + 20, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, boss.radius + 30, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+      // 脉冲发光
+      ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 20 + Math.sin(frameCount * 0.1) * 10;
+    }
+    
     ctx.fillStyle = boss.color; ctx.strokeStyle = boss.color; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.arc(boss.x, boss.y, boss.radius, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(boss.x, boss.y, boss.radius + 10, 0, Math.PI * 2); ctx.stroke();
+    
+    if (boss.isFinal) {
+      // 最终BOSS名字
+      ctx.fillStyle = '#ff4444'; ctx.font = 'bold 14px Courier New'; ctx.textAlign = 'center';
+      ctx.fillText('最终BOSS', boss.x, boss.y - boss.radius - 15);
+      ctx.shadowBlur = 0;
+    }
+    
     ctx.fillStyle = '#ffffff'; ctx.font = 'bold 20px Courier New'; ctx.textAlign = 'center';
     ctx.fillText(Math.ceil(boss.hp), boss.x, boss.y + 7);
     const hbW = boss.radius * 2, hbH = 4, hbX = boss.x - hbW / 2, hbY = boss.y + boss.radius + 10;
