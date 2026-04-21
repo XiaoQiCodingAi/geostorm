@@ -2040,6 +2040,25 @@ function render() {
       ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 8, 0, Math.PI * 2); ctx.stroke();
     }
     
+    // 蓄力弹充能视觉 - 身体发光效果
+    if (weaponMode === 'charge' && chargeTimer > 0) {
+      const chargePercent = Math.min(chargeTimer / 60, 1);
+      const pulseScale = 1 + Math.sin(chargeTimer * 0.5) * 0.1 * chargePercent;
+      // 外层光环
+      ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 3 * chargePercent;
+      ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 20 * chargePercent;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, (player.radius + 15) * pulseScale, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * chargePercent);
+      ctx.stroke();
+      // 充能球体
+      const ballRadius = player.radius * 0.5 * chargePercent;
+      ctx.fillStyle = `rgba(255, 255, 0, ${0.3 + chargePercent * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, ballRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    
     // 近战光刀渲染
     if (weaponMode === 'melee') {
       ctx.save();
@@ -2133,6 +2152,7 @@ function render() {
     ctx.font = '12px Courier New';
     ctx.textAlign = 'center';
     ctx.fillText('充能: ' + Math.floor(chargePercent * 100) + '%', GAME_WIDTH - 60, 105);
+  // 蓄力弹充能指示（已有）
   }
   
   // 渲染场上道具
