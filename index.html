@@ -787,6 +787,7 @@ function spawnEnemy(type, x, y, isElite) {
     fireRate: c.fireRate || 0, fireTimer: Math.floor(Math.random() * (c.fireRate || 60)),
     warningTimer: 0, movePhase: Math.random() * Math.PI * 2,
     canShoot: c.fireRate > 0,
+    attackType: c.attackType || 'cannon',
     canDash: c.dash === true,
     dashWarning: 0, isDashing: false, dashVx: 0, dashVy: 0, dashDuration: 0,
     isElite: isElite || false,
