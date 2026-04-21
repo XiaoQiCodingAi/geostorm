@@ -31,6 +31,7 @@ body {
   background: #0a0a1a;
 }
 .screen.active { display: flex; }
+.screen.transparent { background: transparent !important; }
 h1 { color: #00ffff; font-size: 48px; margin-bottom: 10px; }
 h2 { color: #fff; font-size: 24px; margin-bottom: 30px; }
 .subtitle { color: #888; font-size: 16px; margin-bottom: 40px; }
@@ -81,6 +82,8 @@ input:focus { outline: none; border-color: #00ffff; }
   display: flex;
   gap: 20px;
   margin: 20px 0;
+  position: relative;
+  z-index: 10;
 }
 .skill-card {
   background: #1a1a2e;
@@ -845,9 +848,8 @@ function checkWaveComplete() {
   const allKilled = enemies.length === 0 && waveSpawnQueue.filter(e => e.spawned).length === waveEnemiesTotal;
   
   if (allSpawned && allKilled && !boss) {
-    // Wave complete!
+    // Wave complete! 奖励暂存，等结算时再加
     const reward = WAVE_REWARDS[currentWave];
-    progressData.geoFragments += reward;
     
     // Check for weapon unlock
     const wave = ROGUE_WAVES[currentWave];
@@ -883,6 +885,7 @@ function checkWaveComplete() {
 function showSkillSelect(waveReward) {
   gameState = 'skillSelect';
   showScreen('waveSelectScreen');
+  document.getElementById('waveSelectScreen').classList.add('transparent');
   
   document.getElementById('waveSelectTitle').textContent = `第 ${currentWave} 波完成！`;
   document.getElementById('unlockedWeaponsDisplay').textContent = `💎 +${waveReward} 几何碎片`;
@@ -941,7 +944,13 @@ function selectSkill(index) {
   }
   
   pendingSkillChoices = null;
-  showWaveSelect();
+  // 移除透明背景
+  document.getElementById('waveSelectScreen').classList.remove('transparent');
+  // 直接继续下一波
+  currentWave++;
+  setupWave(currentWave);
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  gameState = 'playing';
 }
 
 function updateEnemies() {
