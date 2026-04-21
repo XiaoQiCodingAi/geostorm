@@ -579,11 +579,16 @@ const ALL_SKILLS = [
 // 掉落表
 const DROP_TABLE = [
   { id: 'energy', name: '能量球', icon: '⚡', desc: '+50能量', weight: 25 },
-  { id: 'scatterBuff', name: '散弹碎片', icon: '🔷', desc: '30秒散弹', weight: 15 },
-  { id: 'pierceBuff', name: '穿透碎片', icon: '🔷', desc: '20秒穿透', weight: 10 },
+  { id: 'scatterBuff', name: '散弹', icon: '🔷', desc: '30秒散弹', weight: 12 },
+  { id: 'pierceBuff', name: '穿透', icon: '🔷', desc: '20秒穿透弹', weight: 12 },
+  { id: 'chargeBuff', name: '蓄力弹', icon: '⚡', desc: '25秒高伤害蓄力弹', weight: 8 },
+  { id: 'meleeBuff', name: '光刀', icon: '⚔️', desc: '25秒近战光刀', weight: 8 },
   { id: 'shield', name: '护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 10 },
   { id: 'heal', name: '生命恢复', icon: '❤️', desc: '恢复1条生命', weight: 10 },
 ];
+
+// 掉落在场上的道具
+let activeDrops = [];
 
 // 10波次设计
 const ROGUE_WAVES = [
@@ -657,8 +662,10 @@ let accumulator = 0;
 // 局内技能build
 let activeSkills = []; // 已选技能
 let skillStacks = {}; // 技能叠加计数
-let weaponMode = 'basic'; // basic, scatter, pierce
+let weaponMode = 'basic'; // basic, scatter, pierce, charge, melee
 let weaponBuffTimer = 0; // 武器buff持续时间
+let chargeTimer = 0; // 蓄力弹充能时间
+let meleeAngle = 0; // 光刀旋转角度
 
 // ==================== INPUT ====================
 document.addEventListener('keydown', (e) => {
@@ -723,7 +730,7 @@ function startGame() {
   
   activeSkills = [];
   skillStacks = {};
-  weaponMode = 'basic';
+  weaponMode = 'basic'; chargeTimer = 0; meleeAngle = 0;
   weaponBuffTimer = 0;
   
   progressData.totalGamesPlayed++;
@@ -1301,8 +1308,21 @@ function spawnDrop(x, y) {
   for (const drop of DROP_TABLE) {
     rand -= drop.weight;
     if (rand <= 0) {
-      pendingDrop = { ...drop, x, y, timer: 120 }; // 2秒显示
+      activeDrops.push({ ...drop, x, y, bobPhase: Math.random() * Math.PI * 2 }); // 添加到场上道具
       break;
+    }
+  }
+}
+
+function checkDropPickup() {
+  for (let i = activeDrops.length - 1; i >= 0; i--) {
+    const drop = activeDrops[i];
+    const dist = Math.hypot(player.x - drop.x, player.y - drop.y);
+    if (dist < player.radius + 20) {
+      // 拾取道具
+      pendingDrop = { ...drop, timer: 90 };
+      activeDrops.splice(i, 1);
+      applyDrop(drop);
     }
   }
 }
@@ -1319,6 +1339,15 @@ function applyDrop(drop) {
     case 'pierceBuff':
       weaponMode = 'pierce';
       weaponBuffTimer = 1200; // 20秒
+      break;
+    case 'chargeBuff':
+      weaponMode = 'charge';
+      weaponBuffTimer = 1500; // 25秒
+      chargeTimer = 0;
+      break;
+    case 'meleeBuff':
+      weaponMode = 'melee';
+      weaponBuffTimer = 1500; // 25秒
       break;
     case 'shield':
       shieldActive = true;
@@ -1535,6 +1564,49 @@ function updatePlayerShooting() {
     let effectiveFireRate = FIRE_RATE;
     if (skillStacks['fireRate1']) effectiveFireRate *= 1 - skillStacks['fireRate1'] * 0.20;
     effectiveFireRate = Math.max(5, Math.floor(effectiveFireRate));
+    
+    // 蓄力弹模式
+    if (weaponMode === 'charge') {
+      chargeTimer++;
+      if (chargeTimer >= 60) { // 1秒充能
+        chargeTimer = 0;
+        let target = null, minDist = Infinity;
+        enemies.forEach(e => { const d = Math.hypot(e.x - player.x, e.y - player.y); if (d < minDist) { minDist = d; target = e; } });
+        if (boss && boss.hp > 0) { const d = Math.hypot(boss.x - player.x, boss.y - player.y); if (d < minDist || !target) target = boss; }
+        if (target) {
+          const angle = Math.atan2(target.y - player.y, target.x - player.x);
+          const damage = DAMAGE * 3; // 3倍伤害
+          playerBullets.push({ x: player.x, y: player.y, vx: Math.cos(angle) * BULLET_SPEED * 1.5, vy: Math.sin(angle) * BULLET_SPEED * 1.5, radius: 10, damage: damage, target: null });
+        }
+      }
+      return;
+    }
+    
+    // 近战光刀模式
+    if (weaponMode === 'melee') {
+      meleeAngle += 0.3;
+      // 光刀碰撞检测
+      const meleeRadius = 60;
+      const meleeDamage = DAMAGE * 0.8;
+      // 检测敌人
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        const dist = Math.hypot(e.x - player.x, e.y - player.y);
+        if (dist < meleeRadius + e.radius) {
+          e.hp -= meleeDamage;
+          floatingTexts.push({ x: e.x, y: e.y - 20, text: Math.floor(meleeDamage).toString(), life: 30, color: '#00ffff' });
+        }
+      }
+      // 检测boss
+      if (boss && boss.hp > 0) {
+        const dist = Math.hypot(boss.x - player.x, boss.y - player.y);
+        if (dist < meleeRadius + boss.radius) {
+          boss.hp -= meleeDamage;
+          floatingTexts.push({ x: boss.x, y: boss.y - 40, text: Math.floor(meleeDamage).toString(), life: 30, color: '#ff66aa' });
+        }
+      }
+      return;
+    }
     
     if (player.fireTimer >= effectiveFireRate) {
       player.fireTimer = 0;
@@ -1957,6 +2029,25 @@ function render() {
       ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 8, 0, Math.PI * 2); ctx.stroke();
     }
+    
+    // 近战光刀渲染
+    if (weaponMode === 'melee') {
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(meleeAngle);
+      ctx.strokeStyle = '#00ffff';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 15;
+      // 绘制光刀弧线
+      ctx.beginPath();
+      ctx.arc(0, 0, 50, -0.5, 0.5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, 50, Math.PI - 0.5, Math.PI + 0.5);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
   
   // J laser beam
@@ -1999,11 +2090,33 @@ function render() {
   
   // Weapon mode
   if (weaponMode !== 'basic' || weaponBuffTimer > 0) {
-    const wNames = { basic: '基础', scatter: '散弹', pierce: '穿透' };
+    const wNames = { basic: '基础', scatter: '散弹', pierce: '穿透弹', charge: '蓄力弹', melee: '光刀' };
     const remaining = Math.ceil(weaponBuffTimer / 60);
     ctx.fillStyle = '#ff66aa';
     ctx.fillText('武器: ' + wNames[weaponMode] + (weaponBuffTimer > 0 ? ' (' + remaining + 's)' : ''), 10, 85);
   }
+  
+  // 蓄力弹充能指示
+  if (weaponMode === 'charge') {
+    const chargePercent = Math.min(chargeTimer / 60, 1);
+    ctx.fillStyle = '#333';
+    ctx.fillRect(GAME_WIDTH - 110, 80, 100, 10);
+    ctx.fillStyle = '#ffff00';
+    ctx.fillRect(GAME_WIDTH - 110, 80, 100 * chargePercent, 10);
+    ctx.fillStyle = '#fff';
+    ctx.font = '12px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText('充能: ' + Math.floor(chargePercent * 100) + '%', GAME_WIDTH - 60, 105);
+  }
+  
+  // 渲染场上道具
+  ctx.textAlign = 'center';
+  activeDrops.forEach(drop => {
+    drop.bobPhase += 0.08;
+    const bobY = Math.sin(drop.bobPhase) * 5;
+    ctx.font = '28px Arial';
+    ctx.fillText(drop.icon, drop.x, drop.y + bobY);
+  });
   
   // Shield
   if (shieldActive) {
@@ -2064,6 +2177,7 @@ function gameLoop(timestamp) {
       updateBoss();
       updateKWave();
       updatePulses();
+      checkDropPickup();
       checkCollisions();
       updateBullets();
       updateParticles();
