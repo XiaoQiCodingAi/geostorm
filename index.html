@@ -1566,7 +1566,7 @@ function updatePlayerShooting() {
     if (weaponMode === 'melee') {
       meleeAngle += 0.15;
       // 光刀碰撞检测
-      const meleeRadius = 60; // 覆盖玩家周围约50%
+      const meleeRadius = 150; // 覆盖玩家周围约50%
       const meleeDamage = DAMAGE * 1.5;
       // 检测敌人
       for (let i = enemies.length - 1; i >= 0; i--) {
@@ -2070,10 +2070,10 @@ function render() {
       ctx.shadowBlur = 15;
       // 绘制光刀弧线
       ctx.beginPath();
-      ctx.arc(0, 0, 50, -0.5, 0.5);
+      ctx.arc(0, 0, 80, -0.5, 0.5);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(0, 0, 50, Math.PI - 0.5, Math.PI + 0.5);
+      ctx.arc(0, 0, 80, Math.PI - 0.5, Math.PI + 0.5);
       ctx.stroke();
       ctx.restore();
     }
