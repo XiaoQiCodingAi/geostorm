@@ -802,6 +802,7 @@ function spawnBoss() {
 }
 
 let bossWarningFlash = 0;
+let bossDefeated = false; // BOSS是否已被击败
 let pulses = []; // 脉冲波（圆形敌人的攻击）
 
 function updateWaveSpawning() {
@@ -855,7 +856,11 @@ function checkWaveComplete() {
   const allSpawned = waveSpawnQueue.every(e => e.spawned);
   const allKilled = enemies.length === 0 && waveSpawnQueue.filter(e => e.spawned).length === waveEnemiesTotal;
   
-  if (allSpawned && allKilled && !boss) {
+  // For boss waves, we need boss to be dead before wave is complete
+  const isBossWave = ROGUE_WAVES[currentWave] && ROGUE_WAVES[currentWave].isBoss;
+  const bossGone = !isBossWave || bossDefeated;
+  
+  if (allSpawned && allKilled && bossGone) {
     // Wave complete! 奖励暂存，等结算时再加
     const reward = WAVE_REWARDS[currentWave];
     
@@ -956,6 +961,7 @@ function selectSkill(index) {
   document.getElementById('waveSelectScreen').classList.remove('transparent');
   // 直接继续下一波
   currentWave++;
+  bossDefeated = false; // 重置BOSS状态
   setupWave(currentWave);
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   gameState = 'playing';
@@ -1237,6 +1243,7 @@ function updateBoss() {
     score += 5000;
     player.energy = getMaxEnergy();
     boss = null;
+    bossDefeated = true;
   }
 }
 
