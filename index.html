@@ -401,7 +401,7 @@ function showUpgrade() {
           <div style="color:#00ffff;font-size:18px;">${upgradeNames[type]} Lv.${level}/${maxLevel}</div>
           <div style="color:#888;font-size:14px;">当前: ${currentEffect}${nextEffect}</div>
         </div>
-        <button class="btn ${level >= maxLevel ? 'secondary' : ''}" ${level >= maxLevel ? 'disabled' : ''} onclick="doUpgrade('${type}')">${cost}</button>
+        <button class="btn ${level >= maxLevel ? 'secondary' : ''}" ${level >= maxLevel ? 'disabled' : ''} onclick="doUpgrade('${type}')" style="min-width:80px;text-align:center;">${cost}</button>
       </div>
     `;
   }
