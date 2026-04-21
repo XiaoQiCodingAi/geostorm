@@ -1561,7 +1561,7 @@ function updatePlayerShooting() {
         if (boss && boss.hp > 0) { const d = Math.hypot(boss.x - player.x, boss.y - player.y); if (d < minDist || !target) target = boss; }
         if (target) {
           const angle = Math.atan2(target.y - player.y, target.x - player.x);
-          let actualDamage = b.isCharge && !enemies[j].isElite ? enemies[j].hp + 100 : b.damage; enemies[j].hp -= actualDamage; // 5倍伤害
+          const damage = DAMAGE * 5; // 5倍伤害
           // 发射时有闪光特效
           for (let i = 0; i < 8; i++) {
             const a = (i / 8) * Math.PI * 2;
