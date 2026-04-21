@@ -566,18 +566,15 @@ const ALL_SKILLS = [
   // 技能强化
   { id: 'laserDamage', name: '激光强化', desc: 'J技能伤害+40%', type: 'skill', stackable: true, maxStack: 2, effect: { laserDamageBonus: 0.40 } },
   { id: 'waveSize', name: '水波强化', desc: 'K技能范围+50%', type: 'skill', stackable: true, maxStack: 1, effect: { waveSizeBonus: 0.50 } },
-  // 特殊弹药
-  { id: 'scatter', name: '散弹模式', desc: '主武器变为散弹', type: 'special', stackable: false, effect: { weaponMode: 'scatter' } },
-  { id: 'pierce', name: '穿透模式', desc: '主武器变为穿透弹', type: 'special', stackable: false, effect: { weaponMode: 'pierce' } },
 ];
 
-// 掉落表
+// 掉落表（临时武器buff）
 const DROP_TABLE = [
-  { id: 'energy', name: '能量球', icon: '⚡', desc: '+50能量', weight: 25 },
-  { id: 'scatterBuff', name: '散弹', icon: '🔷', desc: '30秒散弹', weight: 12 },
-  { id: 'pierceBuff', name: '穿透', icon: '🔷', desc: '20秒穿透弹', weight: 12 },
-  { id: 'chargeBuff', name: '蓄力弹', icon: '⚡', desc: '25秒高伤害蓄力弹', weight: 8 },
-  { id: 'meleeBuff', name: '光刀', icon: '⚔️', desc: '25秒近战光刀', weight: 8 },
+  { id: 'energy', name: '能量球', icon: '⚡', desc: '+50能量', weight: 20 },
+  { id: 'scatterBuff', name: '散弹', icon: '🔷', desc: '60秒散弹', weight: 15 },
+  { id: 'pierceBuff', name: '穿透', icon: '🔷', desc: '60秒穿透弹', weight: 15 },
+  { id: 'chargeBuff', name: '蓄力弹', icon: '⚡', desc: '60秒蓄力弹', weight: 15 },
+  { id: 'meleeBuff', name: '光刀', icon: '⚔️', desc: '60秒光刀', weight: 15 },
   { id: 'shield', name: '护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 10 },
   { id: 'heal', name: '生命恢复', icon: '❤️', desc: '恢复1条生命', weight: 10 },
 ];
@@ -1328,20 +1325,20 @@ function applyDrop(drop) {
       break;
     case 'scatterBuff':
       weaponMode = 'scatter';
-      weaponBuffTimer = 1800; // 30秒
+      weaponBuffTimer = 3600; // 60秒
       break;
     case 'pierceBuff':
       weaponMode = 'pierce';
-      weaponBuffTimer = 1200; // 20秒
+      weaponBuffTimer = 3600; // 60秒
       break;
     case 'chargeBuff':
       weaponMode = 'charge';
-      weaponBuffTimer = 1500; // 25秒
+      weaponBuffTimer = 3600; // 60秒
       chargeTimer = 0;
       break;
     case 'meleeBuff':
       weaponMode = 'melee';
-      weaponBuffTimer = 1500; // 25秒
+      weaponBuffTimer = 3600; // 60秒
       break;
     case 'shield':
       shieldActive = true;
@@ -1586,7 +1583,7 @@ function updatePlayerShooting() {
     if (weaponMode === 'melee') {
       meleeAngle += 0.3;
       // 光刀碰撞检测
-      const meleeRadius = 100;
+      const meleeRadius = 150;
       const meleeDamage = DAMAGE * 1.5;
       // 检测敌人
       for (let i = enemies.length - 1; i >= 0; i--) {
@@ -1741,8 +1738,13 @@ function checkCollisions() {
     
     for (let j = enemies.length - 1; j >= 0; j--) {
       if (Math.hypot(b.x - enemies[j].x, b.y - enemies[j].y) < b.radius + enemies[j].radius) {
-        enemies[j].hp -= b.damage;
-        const dmgText = b.damage % 1 === 0 ? b.damage.toString() : b.damage.toFixed(2).replace(/\.?0+$/, '');
+        let actualDamage = b.damage;
+        // 蓄力弹一击必杀非精英敌人
+        if (b.isCharge && !enemies[j].isElite) {
+          actualDamage = enemies[j].hp + 100; // 足够秒杀
+        }
+        enemies[j].hp -= actualDamage;
+        const dmgText = actualDamage % 1 === 0 ? actualDamage.toString() : actualDamage.toFixed(2).replace(/\.?0+$/, '');
         floatingTexts.push({ x: enemies[j].x, y: enemies[j].y - 20, text: dmgText, life: 30, color: '#ffff00' });
         if (b.pierce) continue;
         hit = true;
@@ -2055,10 +2057,10 @@ function render() {
       ctx.shadowBlur = 15;
       // 绘制光刀弧线
       ctx.beginPath();
-      ctx.arc(0, 0, 80, -0.5, 0.5);
+      ctx.arc(0, 0, 120, -0.5, 0.5);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(0, 0, 80, Math.PI - 0.5, Math.PI + 0.5);
+      ctx.arc(0, 0, 120, Math.PI - 0.5, Math.PI + 0.5);
       ctx.stroke();
       ctx.restore();
     }
