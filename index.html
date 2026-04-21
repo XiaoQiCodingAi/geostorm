@@ -58,6 +58,8 @@ input:focus { outline: none; border-color: #00ffff; }
   border-radius: 4px;
   font-family: inherit;
   transition: background 0.2s;
+  min-width: 200px;
+  text-align: center;
 }
 .btn:hover { background: #00cccc; }
 .btn.secondary { background: #333; color: #fff; }
@@ -1049,18 +1051,16 @@ function updateEnemies() {
         e.x += e.speed * 0.7; 
         e.y += Math.sin(e.movePhase) * 1.5;
         e.x += (dx / dist) * e.speed * trackStrength;
-        // 碰到边界反弹（不穿墙）
-        if (e.x <= e.radius || e.x >= GAME_WIDTH - e.radius) e.vx = -e.vx || -1;
-        e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
+        if (e.x > GAME_WIDTH + 30) e.x = -30; 
+        e.x = Math.max(-e.radius, Math.min(GAME_WIDTH + e.radius, e.x));
         e.y = Math.max(e.radius, Math.min(GAME_HEIGHT - e.radius, e.y));
       } else if (e.type === 'hexagon') { 
         e.movePhase += 0.03; 
         e.x -= e.speed * 0.8; 
         e.y += Math.sin(e.movePhase) * 1;
         e.x += (dx / dist) * e.speed * trackStrength;
-        // 碰到边界反弹（不穿墙）
-        if (e.x <= e.radius || e.x >= GAME_WIDTH - e.radius) e.vx = -e.vx || 1;
-        e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
+        if (e.x < -30) e.x = GAME_WIDTH + 30; 
+        e.x = Math.max(-e.radius, Math.min(GAME_WIDTH + e.radius, e.x));
         e.y = Math.max(e.radius, Math.min(GAME_HEIGHT - e.radius, e.y));
       }
     }
@@ -1855,6 +1855,15 @@ function render() {
   ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 1; ctx.strokeRect(GAME_WIDTH - 110, 35, 100, 15);
   ctx.fillStyle = '#ffffff'; ctx.font = '12px Courier New'; ctx.textAlign = 'center';
   ctx.fillText(Math.floor(player.energy) + '/' + getMaxEnergy(), GAME_WIDTH - 60, 47);
+  
+  // J/K 技能状态
+  const jReady = player.energy > 0;
+  const kReady = player.energy >= 100;
+  ctx.font = '11px Courier New'; ctx.textAlign = 'right';
+  ctx.fillStyle = jReady ? '#00ff00' : '#666';
+  ctx.fillText('J' + (jReady ? '就绪' : '需能量'), GAME_WIDTH - 10, 62);
+  ctx.fillStyle = kReady ? '#00ff00' : '#666';
+  ctx.fillText('K' + (kReady ? '就绪' : '需100'), GAME_WIDTH - 10, 75);
   
   // Active skills
   let skillX = 10; ctx.textAlign = 'left';
