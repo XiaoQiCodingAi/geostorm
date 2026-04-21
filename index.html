@@ -557,11 +557,8 @@ const ALL_SKILLS = [
   { id: 'bulletSpeed1', name: '弹速强化', desc: '子弹速度+15%', type: 'weapon', stackable: true, maxStack: 2, effect: { bulletSpeedBonus: 0.15 } },
   // 能量强化
   { id: 'energyGain1', name: '充能加速', desc: '击杀充能+50%', type: 'energy', stackable: true, maxStack: 2, effect: { energyGainBonus: 0.50 } },
-  { id: 'initialEnergy', name: '初始充能', desc: '初始能量+50', type: 'energy', stackable: false, effect: { initialEnergy: 50 } },
   { id: 'energyCap1', name: '能量涌动', desc: '能量上限+50', type: 'energy', stackable: true, maxStack: 2, effect: { energyCapBonus: 50 } },
   // 生存强化
-  { id: 'hp1', name: '生命强化', desc: '初始生命+1', type: 'survival', stackable: true, maxStack: 2, effect: { hpBonus: 1 } },
-  { id: 'invincible1', name: '铁壁', desc: '无敌时间+50%', type: 'survival', stackable: true, maxStack: 2, effect: { invincibleBonus: 0.50 } },
   { id: 'speed1', name: '疾风步', desc: '移动速度+20%', type: 'survival', stackable: true, maxStack: 2, effect: { speedBonus: 0.20 } },
   // 技能强化
   { id: 'laserDamage', name: '激光强化', desc: 'J技能伤害+40%', type: 'skill', stackable: true, maxStack: 2, effect: { laserDamageBonus: 0.40 } },
@@ -1025,14 +1022,6 @@ function selectSkill(index) {
   activeSkills.push(skill.id);
   if (!skillStacks[skill.id]) skillStacks[skill.id] = 0;
   if (skill.stackable) skillStacks[skill.id]++;
-  
-  if (skill.effect.initialEnergy) {
-    player.energy = Math.min(MAX_ENERGY, player.energy + skill.effect.initialEnergy);
-  }
-  
-  if (skill.effect.hpBonus && skillStacks[skill.id] === 1) {
-    player.lives += skill.effect.hpBonus;
-  }
   
   pendingSkillChoices = null;
   // 移除透明背景
