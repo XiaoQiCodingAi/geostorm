@@ -364,7 +364,7 @@ function logout() {
 // ==================== SCREENS ====================
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  if (id) document.getElementById(id).classList.add('active');
+  if (id) if (id) document.getElementById(id).classList.add('active');
 }
 
 function showLogin() { showScreen('loginScreen'); document.getElementById('loginUsername').focus(); }
@@ -1567,7 +1567,7 @@ function updatePlayerShooting() {
         if (boss && boss.hp > 0) { const d = Math.hypot(boss.x - player.x, boss.y - player.y); if (d < minDist || !target) target = boss; }
         if (target) {
           const angle = Math.atan2(target.y - player.y, target.x - player.x);
-          const damage = DAMAGE * 5; // 5倍伤害
+          let actualDamage = b.isCharge && !enemies[j].isElite ? enemies[j].hp + 100 : b.damage; enemies[j].hp -= actualDamage; // 5倍伤害
           // 发射时有闪光特效
           for (let i = 0; i < 8; i++) {
             const a = (i / 8) * Math.PI * 2;
@@ -2085,16 +2085,21 @@ function render() {
     ctx.globalAlpha = 1;
   }
   
-  // Drop notification
+  // Drop notification (拾取提示)
   if (pendingDrop) {
-    ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 50, 200, 100);
-    ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 2; ctx.strokeRect(GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 50, 200, 100);
-    ctx.font = '36px Courier New'; ctx.textAlign = 'center';
-    ctx.fillText(pendingDrop.icon, GAME_WIDTH/2, GAME_HEIGHT/2 - 10);
-    ctx.font = '16px Courier New'; ctx.fillStyle = '#ffff00';
-    ctx.fillText(pendingDrop.name, GAME_WIDTH/2, GAME_HEIGHT/2 + 20);
+    const flash = Math.sin(pendingDrop.timer * 0.3) * 0.2 + 0.8;
+    ctx.fillStyle = `rgba(0,0,0,${0.9 * flash})`; ctx.fillRect(GAME_WIDTH/2 - 120, GAME_HEIGHT/2 - 60, 240, 120);
+    ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 3; ctx.strokeRect(GAME_WIDTH/2 - 120, GAME_HEIGHT/2 - 60, 240, 120);
+    ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 20;
+    ctx.font = '48px Arial'; ctx.textAlign = 'center';
+    ctx.fillText(pendingDrop.icon, GAME_WIDTH/2, GAME_HEIGHT/2 - 15);
+    ctx.shadowBlur = 0;
+    ctx.font = 'bold 20px Courier New'; ctx.fillStyle = '#ffff00';
+    ctx.fillText(pendingDrop.name + ' 激活！', GAME_WIDTH/2, GAME_HEIGHT/2 + 25);
     ctx.fillStyle = '#aaa'; ctx.font = '14px Courier New';
-    ctx.fillText(pendingDrop.desc, GAME_WIDTH/2, GAME_HEIGHT/2 + 40);
+    ctx.fillText(pendingDrop.desc, GAME_WIDTH/2, GAME_HEIGHT/2 + 50);
+    ctx.fillStyle = '#ffff00'; ctx.font = '12px Courier New';
+    ctx.fillText(Math.ceil(pendingDrop.timer / 60) + '秒后消失', GAME_WIDTH/2, GAME_HEIGHT/2 + 70);
     pendingDrop.timer--;
     if (pendingDrop.timer <= 0) { applyDrop(pendingDrop); pendingDrop = null; }
   }
@@ -2104,12 +2109,23 @@ function render() {
   ctx.fillText('波次: ' + (currentWave + 1) + '/10', 10, 25);
   ctx.fillText('击杀: ' + waveEnemiesKilled + '/' + waveEnemiesTotal, 10, 45);
   
-  // Weapon mode
-  if (weaponMode !== 'basic' || weaponBuffTimer > 0) {
-    const wNames = { basic: '基础', scatter: '散弹', pierce: '穿透弹', charge: '蓄力弹', melee: '光刀' };
+  // Active weapon buff display
+  if (weaponMode !== 'basic') {
+    const wNames = { scatter: '散弹', pierce: '穿透弹', charge: '蓄力弹', melee: '光刀' };
     const remaining = Math.ceil(weaponBuffTimer / 60);
+    if (remaining <= 10) {
+      const flash = Math.sin(frameCount * 0.3) > 0;
+      ctx.fillStyle = flash ? '#ff4444' : '#ff66aa';
+      ctx.fillText('⚠️ ' + wNames[weaponMode] + ' (' + remaining + 's)', 10, 85);
+    } else {
+      ctx.fillStyle = '#ff66aa';
+      ctx.fillText('🔮 ' + wNames[weaponMode] + ' (' + remaining + 's)', 10, 85);
+    }
+    const barWidth = 150;
+    ctx.fillStyle = '#333';
+    ctx.fillRect(10, 90, barWidth, 8);
     ctx.fillStyle = '#ff66aa';
-    ctx.fillText('武器: ' + wNames[weaponMode] + (weaponBuffTimer > 0 ? ' (' + remaining + 's)' : ''), 10, 85);
+    ctx.fillRect(10, 90, barWidth * (weaponBuffTimer / 3600), 8);
   }
   
   // 蓄力弹充能指示
@@ -2148,10 +2164,15 @@ function render() {
     }
   });
   
-  // Shield
+  // Shield display
   if (shieldActive) {
-    ctx.fillStyle = '#00ff00';
-    ctx.fillText('🛡️ 护盾激活', 10, 105);
+    ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 3;
+    ctx.shadowColor = '#00ff00'; ctx.shadowBlur = 15;
+    ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 12, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#00ff00'; ctx.font = '14px Courier New'; ctx.textAlign = 'left';
+    ctx.fillText('🛡️ 护盾', 10, 105);
   }
   
   // Health
