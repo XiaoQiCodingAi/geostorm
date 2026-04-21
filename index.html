@@ -364,7 +364,7 @@ function logout() {
 // ==================== SCREENS ====================
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  if (id) document.getElementById(id).classList.add('active');
 }
 
 function showLogin() { showScreen('loginScreen'); document.getElementById('loginUsername').focus(); }
@@ -1570,7 +1570,7 @@ function updatePlayerShooting() {
         if (boss && boss.hp > 0) { const d = Math.hypot(boss.x - player.x, boss.y - player.y); if (d < minDist || !target) target = boss; }
         if (target) {
           const angle = Math.atan2(target.y - player.y, target.x - player.x);
-          const damage = DAMAGE * 3; // 3倍伤害
+          const damage = DAMAGE * 5; // 5倍伤害
           // 发射时有闪光特效
           for (let i = 0; i < 8; i++) {
             const a = (i / 8) * Math.PI * 2;
@@ -1586,8 +1586,8 @@ function updatePlayerShooting() {
     if (weaponMode === 'melee') {
       meleeAngle += 0.3;
       // 光刀碰撞检测
-      const meleeRadius = 60;
-      const meleeDamage = DAMAGE * 0.8;
+      const meleeRadius = 100;
+      const meleeDamage = DAMAGE * 1.5;
       // 检测敌人
       for (let i = enemies.length - 1; i >= 0; i--) {
         const e = enemies[i];
@@ -2055,10 +2055,10 @@ function render() {
       ctx.shadowBlur = 15;
       // 绘制光刀弧线
       ctx.beginPath();
-      ctx.arc(0, 0, 50, -0.5, 0.5);
+      ctx.arc(0, 0, 80, -0.5, 0.5);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(0, 0, 50, Math.PI - 0.5, Math.PI + 0.5);
+      ctx.arc(0, 0, 80, Math.PI - 0.5, Math.PI + 0.5);
       ctx.stroke();
       ctx.restore();
     }
