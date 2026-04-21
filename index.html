@@ -809,7 +809,8 @@ function updateWaveSpawning() {
   if (gameState !== 'playing') return;
   
   // Boss wave
-  if (ROGUE_WAVES[currentWave].isBoss && !boss && enemies.length === 0 && waveSpawnQueue.every(e => e.spawned)) {
+  if (ROGUE_WAVES[currentWave] && ROGUE_WAVES[currentWave].isBoss && !boss && enemies.length === 0 && waveSpawnQueue.every(e => e.spawned)) {
+    console.log('Spawning boss for wave', currentWave);
     spawnBoss();
     return;
   }
@@ -1233,7 +1234,7 @@ function updateBoss() {
   }
   
   boss.fireTimer++;
-  const fireInterval = boss.phase === 1 ? 90 : boss.phase === 2 ? 60 : 45;
+  const fireInterval = boss.phase === 1 ? 90 : boss.phase === 2 ? 75 : 45;
   if (boss.fireTimer >= fireInterval - 30) boss.warningTimer = 30;
   if (boss.fireTimer >= fireInterval) { boss.fireTimer = 0; boss.warningTimer = 0; fireBossBullet(); }
   if (boss.warningTimer > 0) boss.warningTimer--;
@@ -1255,15 +1256,17 @@ function fireBossBullet() {
     for (let i = 0; i < 12; i++) { const angle = (i / 12) * Math.PI * 2; enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5, radius: 7, color: '#ff66aa', grazed: false }); }
   } else if (boss.phase === 2) {
     const angle = Math.atan2(player.y - boss.y, player.x - boss.x);
-    for (let i = -1; i <= 1; i++) {
-      const a = angle + i * 0.25;
-      enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(a) * 3.5, vy: Math.sin(a) * 3.5, radius: 8, color: '#aa44ff', grazed: false, homing: true });
+    // 2个追踪弹（减少）
+    for (let i = 0; i <= 1; i++) {
+      const a = angle + (i - 0.5) * 0.3;
+      enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(a) * 3.0, vy: Math.sin(a) * 3.0, radius: 8, color: '#aa44ff', grazed: false, homing: true });
     }
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2 + boss.spiralAngle;
+    // 6个环形弹幕（减少）
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + boss.spiralAngle;
       enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(a) * 2.5, vy: Math.sin(a) * 2.5, radius: 6, color: '#aa44ff', grazed: false });
     }
-    boss.spiralAngle += 0.1;
+    boss.spiralAngle += 0.15;
   } else if (boss.phase === 3) {
     for (let i = 0; i < 5; i++) {
       const angle = boss.spiralAngle + (i / 5) * Math.PI * 2;
