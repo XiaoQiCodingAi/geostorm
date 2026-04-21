@@ -1026,12 +1026,6 @@ function selectSkill(index) {
   if (!skillStacks[skill.id]) skillStacks[skill.id] = 0;
   if (skill.stackable) skillStacks[skill.id]++;
   
-  // 特殊处理
-  if (skill.effect.weaponMode) {
-    weaponMode = skill.effect.weaponMode;
-    weaponBuffTimer = skill.id === 'scatter' ? 1800 : skill.id === 'pierce' ? 1200 : 0; // 30秒/20秒
-  }
-  
   if (skill.effect.initialEnergy) {
     player.energy = Math.min(MAX_ENERGY, player.energy + skill.effect.initialEnergy);
   }
