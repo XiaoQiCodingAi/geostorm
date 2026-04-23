@@ -966,7 +966,7 @@ function showSkillSelect() {
     let upgradeDesc = skill.desc;
     if (skill.stackable && nextLvl > 0) {
       if (skill.id === 'blade') {
-        const ranges = ['解锁旋转光刀', '范围 +25%', '范围 +50%', '范围 +75%'];
+        const ranges = ['解锁旋转光刀', '范围 +33%', '范围 +50%', '范围 2倍'];
         upgradeDesc = ranges[Math.min(nextLvl, 3)];
       } else if (skill.id === 'scatter') {
         // bulletCount = 1 + scatterLevel
@@ -2202,7 +2202,7 @@ function render() {
     // 光刀弧 - 只要选择了光刀技能就显示
     if (skillStacks['blade'] > 0) {
       const bladeLevel = skillStacks['blade'] || 0;
-      const bladeAngleSpan = bladeLevel === 1 ? Math.PI / 2 : bladeLevel === 2 ? Math.PI * 0.75 : Math.PI * 1.25; // 90°, 135°, 225°
+      const bladeAngleSpan = bladeLevel === 1 ? Math.PI / 3 : bladeLevel === 2 ? Math.PI * 0.6 : Math.PI;  // 60°, 108°, 180°
       const halfSpan = bladeAngleSpan / 2;
       const r = 100;
       
