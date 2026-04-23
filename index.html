@@ -1181,8 +1181,8 @@ function fireEnemyBullet(enemy) {
     case 'triangle':
       // 三角形：三发扇形散开，朝玩家飞去
       for (let i = 0; i < 3; i++) {
-        const offset = (i - 1) * 0.2; // 中间朝前，两侧偏±0.2弧度
-        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + offset) * speed, vy: Math.sin(angle + offset) * speed, radius: 5, color: enemy.color, grazed: false });
+        const offset = (i - 1) * 0.3; // 中间朝前，两侧偏±0.3弧度，幅度更大更明显
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + offset) * speed, vy: Math.sin(angle + offset) * speed, radius: 6, color: enemy.color, grazed: false });
       }
       break;
     case 'square':
