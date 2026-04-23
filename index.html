@@ -201,7 +201,7 @@ input:focus { outline: none; border-color: #00ffff; }
     </div>
     <div style="background:#1a1a2e;padding:15px;margin:10px 0;border-radius:8px;">
       <div style="color:#44ff88;font-size:18px;">K 屏幕清屏</div>
-      <div style="color:#888;font-size:14px;margin-top:8px;">消耗200能量释放全屏电磁波<br>对敌人造成100点伤害</div>
+      <div style="color:#888;font-size:14px;margin-top:8px;">消耗200能量释放全屏电磁波<br>对敌人造成30/40/50/60点伤害</div>
     </div>
     <div style="background:#1a1a2e;padding:15px;margin:10px 0;border-radius:8px;">
       <div style="color:#ffff00;font-size:18px;">💎 几何碎片</div>
@@ -259,7 +259,7 @@ let progressData = {
 // 升级配置
 const UPGRADE_CONFIG = {
   laserDamage: { name: '🔫 激光伤害', base: 2, perLevel: 0.4, unit: '伤害/帧', maxLevel: 3, baseCost: 50, costInc: 30 },
-  emWaveDamage: { name: '⚡ 电磁波伤害', base: 50, perLevel: 25, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
+  emWaveDamage: { name: '⚡ 电磁波伤害', base: 30, perLevel: 10, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
   basicDamage: { name: '💥 基础伤害', base: 15, perLevel: 1, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
   basicFireRate: { name: '🚀 基础射速', base: 14, perLevel: -0.5, unit: '帧间隔', maxLevel: 3, baseCost: 50, costInc: 30 }
 };
