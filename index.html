@@ -1571,7 +1571,7 @@ function updatePlayerShooting() {
     const bladeHalf = bladeAngleSpan / 2;
     const damageLvl = progressData.upgrades.basicDamage || 0;
     const meleeDamageMod = getUpgradeValue('basicDamage') / DAMAGE;
-    const bladeDamage = DAMAGE * 1.5 * meleeDamageMod * (1 + bladeLvl * 0.25);
+    const bladeDamage = 50 * meleeDamageMod * (1 + bladeLvl * 0.25);
     
     // 销毁敌弹
     for (let i = enemyBullets.length - 1; i >= 0; i--) {
