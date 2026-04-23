@@ -788,7 +788,7 @@ function spawnEnemy(type, x, y, isElite) {
   const c = ENEMY_TYPES[type];
   const eliteScale = isElite ? 1.5 : 1;
   const eliteHpMult = isElite ? 2 : 1;
-  const eliteHp = isElite ? ENEMY_TYPES['circle'].hp * 2 : c.hp;
+  const eliteHp = isElite ? c.hp * 2 : c.hp;
   
   enemies.push({
     id: enemyIdCounter++,
