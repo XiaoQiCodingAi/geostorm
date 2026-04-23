@@ -492,7 +492,7 @@ async function showMyRecords() {
           <span class="rank">#${i+1}</span>
           <span class="info">${new Date(r.played_at || r.created_at).toLocaleString('zh-CN')}</span>
           <span class="score">${r.score}分</span>
-          <span class="time">${r.clear_time ? Math.floor(r.clear_time) + "秒" : "-"}</span>
+          <span class="time">${r.clear_time ? r.clear_time.toFixed(1) + "秒" : "耗时<0.1秒"}</span>
         </div>
       `).join('');
     }
@@ -521,7 +521,7 @@ async function showLeaderboard() {
             <span class="rank">${['🥇','🥈','🥉'][i] || (i+1)+'.'}</span>
             <span class="info">${r.username}</span>
             <span class="score">${r.score}分</span>
-            <span class="time">${r.clear_time ? Math.floor(r.clear_time) + "秒" : "-"}</span>
+            <span class="time">${r.clear_time ? r.clear_time.toFixed(1) + "秒" : "耗时<0.1秒"}</span>
             <span class="date">${r.played_at ? new Date(r.played_at).toLocaleDateString('zh-CN') : ''}</span>
           </div>
         `;
