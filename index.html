@@ -1389,7 +1389,7 @@ function fireBossBullet() {
 function fireStageBossBullet() {
   // 阶段BOSS（Wave 5）的攻击
   if (boss.phase === 1) {
-    for (let i = 0; i < 8; i++) { const angle = (i / 8) * Math.PI * 2; enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5, radius: 7, color: '#ff66aa', grazed: false }); }
+    for (let i = 0; i < 12; i++) { const angle = (i / 12) * Math.PI * 2; enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5, radius: 7, color: '#ff66aa', grazed: false }); }
   } else if (boss.phase === 2) {
     const angle = Math.atan2(player.y - boss.y, player.x - boss.x);
     for (let i = 0; i <= 1; i++) {
