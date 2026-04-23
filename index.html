@@ -1824,6 +1824,14 @@ function updateKWave() {
         e.hp -= waveDmg;
       }
     }
+    // 销毁触碰到的敌方子弹
+    for (let bi = enemyBullets.length - 1; bi >= 0; bi--) {
+      const b = enemyBullets[bi];
+      const dist = Math.hypot(b.x - kw.x, b.y - kw.y);
+      if (dist <= kw.radius + b.radius + 5) {
+        enemyBullets.splice(bi, 1);
+      }
+    }
     // Boss伤害
     if (boss && boss.hp > 0 && !kw.hit.has(boss)) {
       const dist = Math.hypot(boss.x - kw.x, boss.y - kw.y);
