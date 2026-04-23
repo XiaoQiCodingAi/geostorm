@@ -7,9 +7,9 @@ const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 
 // 玩家属性
-const PLAYER_RADIUS = 10;
+const PLAYER_RADIUS = 15;
 const PLAYER_SPEED = 5;
-const PLAYER_HIT_RADIUS = 8;
+const PLAYER_HIT_RADIUS = 12;
 const GRAZE_RADIUS = 25;
 const INVINCIBLE_FRAMES = 90;
 
