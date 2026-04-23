@@ -1577,7 +1577,7 @@ function updatePlayerShooting() {
     for (let i = enemyBullets.length - 1; i >= 0; i--) {
       const eb = enemyBullets[i];
       const dist = Math.hypot(eb.x - player.x, eb.y - player.y);
-      if (dist < bladeRadius + eb.radius && dist > bladeRadius * 0.3  // 内圈半径) {
+      if (dist < bladeRadius + eb.radius && dist > bladeRadius * 0.3) { // 内圈半径
         const ang = Math.atan2(eb.y - player.y, eb.x - player.x);
         let angleDiff = ang - meleeAngle;
         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
