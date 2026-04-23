@@ -253,8 +253,8 @@ app.post('/api/scores', authMiddleware, async (req, res) => {
   
   try {
     const result = await dbRun(
-      'INSERT INTO scores (user_id, score, clear_time, damage_reduction, graze_count, wave_reached) VALUES (?, ?, ?, ?, ?, ?)',
-      [req.userId, score, clearTime || 0, damageReduction ? 1 : 0, grazeCount || 0, waveReached || 0]
+      'INSERT INTO scores (user_id, score, clear_time, damage_reduction, graze_count, wave_reached, played_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [req.userId, score, clearTime || 0, damageReduction ? 1 : 0, grazeCount || 0, waveReached || 0, req.body.played_at || null]
     );
     res.json({ id: result.lastID, message: 'Score saved' });
   } catch (err) {
