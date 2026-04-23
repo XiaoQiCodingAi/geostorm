@@ -1473,6 +1473,24 @@ function fireFinalBossBullet() {
       enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(angle) * 2, vy: Math.sin(angle) * 2, radius: 5, color: '#ffff00', grazed: false });
     }
     boss.spiralAngle += 0.12;
+    
+    // 每4次攻击召唤小怪
+    boss.summonTimer = (boss.summonTimer || 0) + 1;
+    if (boss.summonTimer >= 4 && enemies.length < 15) {
+      boss.summonTimer = 0;
+      for (let i = 0; i < 3; i++) {
+        const types = ['triangle', 'square', 'circle'];
+        const summonType = types[Math.floor(Math.random() * types.length)];
+        const cfg = ENEMY_TYPES[summonType];
+        enemies.push({
+          type: summonType, x: 60 + Math.random() * (GAME_WIDTH - 120), y: -20,
+          vx: 0, vy: cfg.speed, hp: cfg.hp, maxHp: cfg.hp, radius: cfg.radius,
+          color: cfg.color, score: cfg.score, speed: cfg.speed,
+          fireTimer: Math.floor(Math.random() * cfg.fireRate),
+          isElite: false, movePhase: 0
+        });
+      }
+    }
   } else if (boss.phase === 2) {
     // Phase 2: "螺旋风暴" - 多层螺旋弹幕，几乎无缝隙
     const spiralCount = 3;
