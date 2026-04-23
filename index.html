@@ -258,7 +258,7 @@ let progressData = {
 
 // 升级配置
 const UPGRADE_CONFIG = {
-  laserDamage: { name: '🔫 激光伤害', base: 2, perLevel: 0.4, unit: '伤害/帧', maxLevel: 3, baseCost: 50, costInc: 30 },
+  laserDamage: { name: '🔫 激光伤害', base: 2, perLevel: 1, unit: '伤害/帧', maxLevel: 3, baseCost: 50, costInc: 30 },
   emWaveDamage: { name: '⚡ 电磁波伤害', base: 30, perLevel: 10, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
   basicDamage: { name: '💥 基础伤害', base: 15, perLevel: 1, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
   basicFireRate: { name: '🚀 基础射速', base: 14, perLevel: -0.5, unit: '帧间隔', maxLevel: 3, baseCost: 50, costInc: 30 }
@@ -1633,7 +1633,7 @@ function updatePlayerShooting() {
     const speedLvl = progressData.upgrades.moveSpeed || 0;
     const laserLvl = progressData.upgrades.laserDamage || 0;
     
-    let effectiveFireRate = FIRE_RATE * (1 - fireRateLvl * 0.15);
+    let effectiveFireRate = getUpgradeValue('basicFireRate');
     effectiveFireRate = Math.max(5, Math.floor(effectiveFireRate));
     
     const baseDamage = getUpgradeValue('basicDamage');
@@ -1749,7 +1749,7 @@ function updatePlayer() {
       const laserLvl = progressData.upgrades.laserDamage || 0;
       const laserChainLevel = skillStacks['laser'] || 0;
       const laserChainCount = 1 + laserChainLevel; // 1-5 targets
-      let laserDamage = J_SKILL_DAMAGE * (1 + laserLvl * 0.40);
+      let laserDamage = getUpgradeValue('laserDamage');
       const chainDamage = laserDamage * 0.3; // 连锁伤害与主激光相同
       
       // 记录已被激光命中的目标（使用全局变量以便渲染访问）
