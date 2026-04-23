@@ -1182,7 +1182,7 @@ function fireEnemyBullet(enemy) {
   switch (enemy.attackType) {
     case 'triangle':
       // 三角形：单发子弹
-      for (let i = 0; i < 1; i++) {
+      for (let i = 0; i < 1; i++) { const offset = 0;
         
         enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + offset) * speed, vy: Math.sin(angle + offset) * speed, radius: 6, color: enemy.color, grazed: false });
       }
