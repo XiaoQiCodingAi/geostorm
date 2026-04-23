@@ -45,7 +45,7 @@ const ENEMY_TYPES = {
   // 四边形：四角弹 - 朝四个角发射
   square: { hp: 60, speed: 1.0, bulletSpeed: 2.0, radius: 18, score: 250, color: '#ffaa22', fireRate: 100, attackType: 'square' },
   // 圆形：脉冲型 - 扩散脉冲环
-  circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff44aa', fireRate: 120, attackType: 'pulse' },
+  circle: { hp: 30, speed: 1.6, bulletSpeed: 0, radius: 15, score: 100, color: '#ff44aa', fireRate: 120, attackType: 'pulse' },
   // 五边形：五连星 - 5发间隔0.3秒逐发
   pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#ff8800', fireRate: 90, attackType: 'pentagon' },
   // 六边形：六芒脉冲 - 大脉冲+6发小弹
