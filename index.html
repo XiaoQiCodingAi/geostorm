@@ -274,13 +274,13 @@ function getUpgradeValue(type) {
   const cfg = UPGRADE_CONFIG[type];
   const level = progressData.upgrades[type] || 0;
   if (level === 0) return cfg.base;
-  return cfg.base * (1 + cfg.perLevel * level);
+  return cfg.base + cfg.perLevel * level;
 }
 
 function getNextValue(type) {
   const cfg = UPGRADE_CONFIG[type];
   const level = (progressData.upgrades[type] || 0) + 1;
-  return cfg.base * (1 + cfg.perLevel * level);
+  return cfg.base + cfg.perLevel * level;
 }
 
 async function loadProgressFromServer() {
