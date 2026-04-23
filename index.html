@@ -1181,9 +1181,9 @@ function fireEnemyBullet(enemy) {
   // 根据攻击类型发射
   switch (enemy.attackType) {
     case 'triangle':
-      // 三角形：三发扇形散开，朝玩家飞去
-      for (let i = 0; i < 3; i++) {
-        const offset = (i - 1) * 0.3; // 中间朝前，两侧偏±0.3弧度，幅度更大更明显
+      // 三角形：单发子弹
+      for (let i = 0; i < 1; i++) {
+        
         enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + offset) * speed, vy: Math.sin(angle + offset) * speed, radius: 6, color: enemy.color, grazed: false });
       }
       break;
@@ -2111,7 +2111,7 @@ function render() {
       ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.movePhase);
       ctx.strokeStyle = 'rgba(255,255,255,0.25)';
       ctx.beginPath();
-      for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); }
+      for (let i = 0; i < 1; i++) { const a = (i / 3) * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(a) * e.radius, Math.sin(a) * e.radius); }
       ctx.closePath(); ctx.stroke();
       ctx.fillStyle = e.color; ctx.beginPath();
       const segT = Math.ceil(hpRatio * 3);
