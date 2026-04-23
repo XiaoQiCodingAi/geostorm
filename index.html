@@ -788,12 +788,13 @@ function spawnEnemy(type, x, y, isElite) {
   const c = ENEMY_TYPES[type];
   const eliteScale = isElite ? 1.5 : 1;
   const eliteHpMult = isElite ? 2 : 1;
+  const eliteHp = isElite ? ENEMY_TYPES['circle'].hp * 2 : c.hp;
   
   enemies.push({
     id: enemyIdCounter++,
     type, x: x !== undefined ? x : Math.random() * (GAME_WIDTH - 100) + 50,
     y: y !== undefined ? y : -30,
-    hp: c.hp * eliteHpMult, maxHp: c.hp * eliteHpMult,
+    hp: eliteHp, maxHp: eliteHp,
     speed: c.speed, bulletSpeed: c.bulletSpeed,
     radius: c.radius * eliteScale, score: c.score * (isElite ? 2 : 1), color: c.color,
     fireRate: c.fireRate || 0, fireTimer: Math.floor(Math.random() * (c.fireRate || 60)),
