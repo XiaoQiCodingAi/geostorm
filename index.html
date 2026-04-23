@@ -598,6 +598,8 @@ let waveEnemiesTotal = 0;
 let waveEnemiesKilled = 0;
 let waveSpawnQueue = [];
 let waveSpawnTimer = 0;
+let currentGroupIndex = 0;
+let currentGroupSpawnTimer = 0;
 let boss = null;
 let enemyIdCounter = 0;
 let gameLoopId = null;
@@ -693,16 +695,42 @@ function setupWave(waveIndex) {
   waveSpawnQueue = [];
   waveEnemiesKilled = 0;
   waveSpawnTimer = 0;
+  currentGroupIndex = 0;
+  currentGroupSpawnTimer = 0;
   
-  for (const e of wave.enemies) {
-    const count = e.count || 0;
-    for (let i = 0; i < count; i++) {
-      waveSpawnQueue.push({
-        type: e.type === 'elite' ? getRandomEnemyType() : e.type,
-        isElite: e.type === 'elite' || (Math.random() < wave.eliteChance),
-        spawned: false
-      });
-      waveEnemiesTotal++;
+  // Check if new groups format or old enemies format
+  if (wave.groups) {
+    // New groups format: build queue from groups
+    for (let g = 0; g < wave.groups.length; g++) {
+      const group = wave.groups[g];
+      for (let i = 0; i < group.count; i++) {
+        const type = group.mixed 
+          ? group.types[Math.floor(Math.random() * group.types.length)]
+          : group.types[0];
+        waveSpawnQueue.push({
+          type: type === 'elite' ? getRandomEnemyType() : type,
+          isElite: type === 'elite' || (Math.random() < wave.eliteChance),
+          spawned: false,
+          groupIndex: g,
+          groupInterval: group.interval || 30
+        });
+        waveEnemiesTotal++;
+      }
+    }
+  } else if (wave.enemies) {
+    // Old format for backward compatibility
+    for (const e of wave.enemies) {
+      const count = e.count || 0;
+      for (let i = 0; i < count; i++) {
+        waveSpawnQueue.push({
+          type: e.type === 'elite' ? getRandomEnemyType() : e.type,
+          isElite: e.type === 'elite' || (Math.random() < wave.eliteChance),
+          spawned: false,
+          groupIndex: 0,
+          groupInterval: 45
+        });
+        waveEnemiesTotal++;
+      }
     }
   }
   boss = null;
@@ -838,11 +866,19 @@ function updateWaveSpawning() {
     return;
   }
   
-  // Spawn enemies from queue
+  // Spawn enemies from queue (group-based)
   waveSpawnTimer++;
-  const spawnInterval = 45; // 每45帧生成一个
   
-  if (waveSpawnTimer >= spawnInterval) {
+  // Find current group's interval
+  let currentInterval = 45;
+  for (const item of waveSpawnQueue) {
+    if (!item.spawned) {
+      currentInterval = item.groupInterval || 45;
+      break;
+    }
+  }
+  
+  if (waveSpawnTimer >= currentInterval) {
     waveSpawnTimer = 0;
     
     // Find next unspawned enemy
