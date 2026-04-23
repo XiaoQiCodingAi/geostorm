@@ -1071,47 +1071,36 @@ function updateEnemies() {
       if (e.dashWarning > 0) e.dashWarning--;
     }
     
-    // Normal movement
+    // Normal movement - 所有敌人在整个移动过程中始终追踪玩家
     if (!e.isDashing) {
-      const trackStrength = 0.22;
       const dx = player.x - e.x;
       const dy = player.y - e.y;
       const dist = Math.hypot(dx, dy) || 1;
-      const trackMult = 0.25; // 所有敌人都有基础追踪能力
+      const trackMult = 0.35; // 统一追踪强度
       
       if (e.type === 'circle' || e.type === 'chaser') {
         e.y += e.speed;
         e.x += (dx / dist) * e.speed * trackMult;
         e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
-        // 到达顶部边界后主要追踪玩家
-        if (e.y >= GAME_HEIGHT * 0.7) {
-          e.y = Math.min(e.y, GAME_HEIGHT * 0.7);
-          e.x += (dx / dist) * e.speed * 0.6;
-        }
+        e.y = Math.min(e.y, GAME_HEIGHT - e.radius);
       } else if (e.type === 'triangle' || e.type === 'pentagon') {
         e.movePhase += 0.03;
         e.y += e.speed * 0.8;
         e.x += (dx / dist) * e.speed * trackMult;
         e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
-        // 到达顶部边界后主要追踪玩家
-        if (e.y >= GAME_HEIGHT * 0.7) {
-          e.y = Math.min(e.y, GAME_HEIGHT * 0.7);
-          e.x += (dx / dist) * e.speed * 0.6;
-        }
-      } else if (e.type === 'square') { 
-        e.movePhase += 0.05; 
-        e.x += e.speed * 0.7; 
+        e.y = Math.min(e.y, GAME_HEIGHT - e.radius);
+      } else if (e.type === 'square') {
+        e.movePhase += 0.05;
+        e.x += e.speed * 0.7;
         e.y += Math.sin(e.movePhase) * 1.5;
-        // 始终追踪玩家
         e.x += (dx / dist) * e.speed * trackMult;
         e.y += (dy / dist) * e.speed * trackMult;
         e.x = Math.max(-e.radius, Math.min(GAME_WIDTH + e.radius, e.x));
         e.y = Math.max(e.radius, Math.min(GAME_HEIGHT - e.radius, e.y));
-      } else if (e.type === 'hexagon') { 
-        e.movePhase += 0.03; 
-        e.x -= e.speed * 0.8; 
+      } else if (e.type === 'hexagon') {
+        e.movePhase += 0.03;
+        e.x -= e.speed * 0.8;
         e.y += Math.sin(e.movePhase) * 1;
-        // 始终追踪玩家
         e.x += (dx / dist) * e.speed * trackMult;
         e.y += (dy / dist) * e.speed * trackMult;
         e.x = Math.max(-e.radius, Math.min(GAME_WIDTH + e.radius, e.x));
@@ -1190,9 +1179,10 @@ function fireEnemyBullet(enemy) {
   // 根据攻击类型发射
   switch (enemy.attackType) {
     case 'triangle':
-      // 三角形：三发完全集中成一束，朝玩家飞去
+      // 三角形：三发扇形散开，朝玩家飞去
       for (let i = 0; i < 3; i++) {
-        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 5, color: enemy.color, grazed: false });
+        const offset = (i - 1) * 0.2; // 中间朝前，两侧偏±0.2弧度
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + offset) * speed, vy: Math.sin(angle + offset) * speed, radius: 5, color: enemy.color, grazed: false });
       }
       break;
     case 'square':
@@ -1723,28 +1713,43 @@ function updatePlayer() {
         if (dist <= e.radius + 5) e.hp -= laserDamage;
       });
       
-      // 连锁攻击：查找其他目标
-      const chainRange = Math.hypot(GAME_WIDTH, GAME_HEIGHT);
-      for (let chain = 0; chain < laserChainLevel + 1; chain++) { // Lv.1连锁2个, Lv.2连锁3个, Lv.3连锁4个
-        let nearest = null, nearestDist = Infinity;
-        const lastTarget = laserHitTargets[laserHitTargets.length - 1];
-        enemies.forEach(e => {
-          if (e.hp <= 0 || laserHitTargets.includes(e)) return;
-          const d = Math.hypot(e.x - lastTarget.x, e.y - lastTarget.y);
-          if (d < nearestDist && d <= chainRange) {
-            nearestDist = d;
-            nearest = e;
+      // 连锁攻击：需要先有连锁buff才能连锁
+      if (laserChainLevel > 0) {
+        const chainRange = Math.hypot(GAME_WIDTH, GAME_HEIGHT);
+        for (let chain = 0; chain < laserChainLevel; chain++) { // Lv.1连锁1个额外目标, Lv.2连锁2个, ...
+          let nearest = null, nearestDist = Infinity;
+          const lastTarget = laserHitTargets[laserHitTargets.length - 1];
+          enemies.forEach(e => {
+            if (e.hp <= 0 || laserHitTargets.includes(e)) return;
+            const d = Math.hypot(e.x - lastTarget.x, e.y - lastTarget.y);
+            if (d < nearestDist && d <= chainRange) {
+              nearestDist = d;
+              nearest = e;
+            }
+          });
+          if (nearest && Math.hypot(nearest.x - lastTarget.x, nearest.y - lastTarget.y) > 30) {
+            laserHitTargets.push(nearest);
+            nearest.hp -= chainDamage;
+            floatingTexts.push({ x: nearest.x, y: nearest.y - 20, text: chainDamage.toFixed(0), life: 30, color: '#ff8800' });
+          } else {
+            break; // 没有更多可连锁目标
           }
-        });
-        if (nearest && Math.hypot(nearest.x - lastTarget.x, nearest.y - lastTarget.y) > 30) {
-          laserHitTargets.push(nearest);
-          nearest.hp -= chainDamage;
-          floatingTexts.push({ x: nearest.x, y: nearest.y - 20, text: chainDamage.toFixed(0), life: 30, color: '#ff8800' });
+        }
+
+        // Boss 也参与连锁（仅在有连锁buff时）
+        if (boss && boss.hp > 0 && !laserHitTargets.includes(boss)) {
+          const lastTarget = laserHitTargets[laserHitTargets.length - 1];
+          const d = Math.hypot(boss.x - lastTarget.x, boss.y - lastTarget.y);
+          if (d <= chainRange && d > 30) {
+            laserHitTargets.push(boss);
+            boss.hp -= chainDamage;
+            floatingTexts.push({ x: boss.x, y: boss.y - 40, text: chainDamage.toFixed(0), life: 30, color: '#ff8800' });
+          }
         }
       }
-      
+
+      // Boss 受激光伤害（独立于连锁，不受连锁buff影响）
       if (boss && boss.hp > 0) {
-        // 检查boss是否在主激光路径上
         const laserAngle = Math.atan2(jLaserTarget.y - player.y, jLaserTarget.x - player.x);
         const laserLength = Math.hypot(jLaserTarget.x - player.x, jLaserTarget.y - player.y);
         const ex = boss.x - player.x, ey = boss.y - player.y;
@@ -1754,16 +1759,6 @@ function updatePlayer() {
           const closestY = player.y + Math.sin(laserAngle) * dot;
           const dist = Math.hypot(boss.x - closestX, boss.y - closestY);
           if (dist <= boss.radius + 5) boss.hp -= laserDamage;
-        }
-        // Boss 也参与连锁
-        if (!laserHitTargets.includes(boss) && boss.hp > 0) {
-          const lastTarget = laserHitTargets[laserHitTargets.length - 1];
-          const d = Math.hypot(boss.x - lastTarget.x, boss.y - lastTarget.y);
-          if (d <= chainRange && d > 30) {
-            laserHitTargets.push(boss);
-            boss.hp -= chainDamage;
-            floatingTexts.push({ x: boss.x, y: boss.y - 40, text: chainDamage.toFixed(0), life: 30, color: '#ff8800' });
-          }
         }
       }
     }
