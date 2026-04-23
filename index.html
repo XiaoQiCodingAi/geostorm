@@ -1278,7 +1278,7 @@ function fireEnemyBullet(enemy) {
       }
       enemy.spiralAngle = (hexSpiralOffset + 0.3) % (Math.PI * 2);
       break;
-    case 'combo':
+    // Reserved for potential future use
       // 精英：炮台+偶尔三连发
       enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 7, color: enemy.color, grazed: false });
       if (Math.random() < 0.3) {
@@ -1286,6 +1286,11 @@ function fireEnemyBullet(enemy) {
         enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + 0.3) * speed, vy: Math.sin(angle + 0.3) * speed, radius: 5, color: enemy.color, grazed: false });
       }
       break;
+  }
+  
+  // 精英额外攻击：脉冲波
+  if (enemy.isElite) {
+    pulses.push({ x: enemy.x, y: enemy.y, radius: enemy.radius, maxRadius: 80, speed: 2.5, damage: 1, hit: false, isCharge: false, color: '#ffffff' });
   }
 }
 
