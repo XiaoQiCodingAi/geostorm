@@ -103,10 +103,10 @@ const ALL_SKILLS = [
 
 // 掉落表
 const DROP_TABLE = [
-  { id: 'none', name: '空', icon: '', desc: '无掉落', weight: 160 },
-  { id: 'energy', name: '⚡能量', icon: '⚡', desc: '+50能量', weight: 20 },
-  { id: 'shield', name: '🛡️护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 10 },
-  { id: 'heal', name: '❤️生命', icon: '❤️', desc: '恢复1条生命', weight: 10 },
+  { id: 'none', name: '空', icon: '', desc: '无掉落', weight: 80 },
+  { id: 'energy', name: '⚡能量', icon: '⚡', desc: '+50能量', weight: 12 },
+  { id: 'shield', name: '🛡️护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 3 },
+  { id: 'heal', name: '❤️生命', icon: '❤️', desc: '恢复1条生命', weight: 3 },
 ];
 
 console.log('config.js loaded');
