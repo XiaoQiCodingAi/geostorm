@@ -1570,7 +1570,7 @@ function updatePlayerShooting() {
     const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 3 : bladeLvl === 2 ? Math.PI * 0.6 : Math.PI;  // 60/108/180度，约覆盖33%/50%
     const bladeHalf = bladeAngleSpan / 2;
     const damageLvl = progressData.upgrades.basicDamage || 0;
-    const meleeDamageMod = 1 + damageLvl * 0.25;
+    const meleeDamageMod = getUpgradeValue('basicDamage') / DAMAGE;
     const bladeDamage = DAMAGE * 1.5 * meleeDamageMod * (1 + bladeLvl * 0.25);
     
     // 销毁敌弹
@@ -1636,7 +1636,7 @@ function updatePlayerShooting() {
     let effectiveFireRate = FIRE_RATE * (1 - fireRateLvl * 0.15);
     effectiveFireRate = Math.max(5, Math.floor(effectiveFireRate));
     
-    const baseDamage = DAMAGE * (1 + damageLvl * 0.25);
+    const baseDamage = getUpgradeValue('basicDamage');
     const bulletSpeedMod = 1 + damageLvl * 0.10;
     const chargeDamage = baseDamage * 5;
     
@@ -1870,7 +1870,7 @@ function updateKWave() {
     // 收集当前所有活着的敌人
     const aliveEnemies = enemies.filter(e => e.hp > 0);
     const emWaveUpgradeLvl = progressData.upgrades.emWaveDamage || 0;
-    const waveBaseDmg = K_WAVE_FIXED_DAMAGE * (1 + emWaveUpgradeLvl * 0.5);
+    const waveBaseDmg = getUpgradeValue('emWaveDamage');
     for (const e of aliveEnemies) {
       if (kw.hit.has(e)) continue;
       const dist = Math.hypot(e.x - kw.x, e.y - kw.y);
