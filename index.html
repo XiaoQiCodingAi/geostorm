@@ -2134,7 +2134,7 @@ function render() {
       ctx.closePath(); ctx.fill();
       ctx.restore();
     } else if (e.type === 'chaser') {
-      ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(Math.atan2(e.isDashing ? e.dashVy : 1, e.isDashing ? e.dashVx : 0));
+      ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(Math.atan2(player.y - e.y, player.x - e.x));
       ctx.fillStyle = e.color; ctx.beginPath();
       ctx.moveTo(e.radius, 0); ctx.lineTo(-e.radius * 0.7, -e.radius * 0.6); ctx.lineTo(-e.radius * 0.7, e.radius * 0.6); ctx.closePath(); ctx.fill();
       ctx.restore();
