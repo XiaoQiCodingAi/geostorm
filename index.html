@@ -1652,7 +1652,9 @@ function updatePlayerShooting() {
             const a = angle + offsetAngle;
             const pierceLevel = skillStacks['pierce'] || 0;
             const pierceCount = 1 + pierceLevel;
-            playerBullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * BULLET_SPEED * bulletSpeedMod, vy: Math.sin(a) * BULLET_SPEED * bulletSpeedMod, radius: 5, damage: baseDamage * 0.7, pierce: pierceCount, hitTargets: [], target: null });
+            const bulletData = { x: player.x, y: player.y, vx: Math.cos(a) * BULLET_SPEED * bulletSpeedMod, vy: Math.sin(a) * BULLET_SPEED * bulletSpeedMod, radius: 5, damage: baseDamage * 0.7, target: null };
+            if (pierceLevel > 0) { bulletData.pierce = pierceCount; bulletData.hitTargets = []; }
+            playerBullets.push(bulletData);
           }
         } else if (skillStacks['pierce'] > 0) {
           const pierceLevel = skillStacks['pierce'] || 0;
