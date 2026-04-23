@@ -1504,7 +1504,7 @@ async function submitScore(finalScore, clearTime) {
     await fetch(API_BASE + '/scores', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ score: finalScore, clear_time: clearTime, played_at: new Date().toISOString() })
+      body: JSON.stringify({ score: finalScore, clear_time: clearTime, played_at: new Date().toLocaleString('zh-CN') })
     });
   } catch (e) {
     console.log('提交分数失败');
