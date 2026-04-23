@@ -1250,12 +1250,12 @@ function fireEnemyBullet(enemy) {
         const spreadAngle = (i - 2) * 0.15; // 扇形展开
         enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + spreadAngle) * speed, vy: Math.sin(angle + spreadAngle) * speed, radius: 6, color: enemy.color, grazed: false });
       }
-      enemy.pentagonCooldown = 60; // 60帧后 = 1秒冷却
+      enemy.pentagonCooldown = 40; // 40帧后 ≈ 0.67秒冷却
       break;
     case 'hexagon':
       // 六边形：蓄力模式 - 普通6发螺旋弹，每3次攻击后蓄力发射一个快速弹
       enemy.hexagonCharge = (enemy.hexagonCharge || 0) + 1;
-      if (enemy.hexagonCharge >= 3) {
+      if (enemy.hexagonCharge >= 2) {
         // 蓄力完成，发射快速弹
         enemy.hexagonCharge = 0;
         enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * 5, vy: Math.sin(angle) * 5, radius: 10, color: '#ffffff', grazed: false, isCharged: true });
