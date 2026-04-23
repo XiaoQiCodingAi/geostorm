@@ -287,10 +287,10 @@ app.get('/api/leaderboard', async (req, res) => {
       WHERE s.id = (
         SELECT id FROM scores s2 
         WHERE s2.user_id = s.user_id 
-        ORDER BY s2.score DESC 
+        ORDER BY s2.score DESC, s2.clear_time ASC 
         LIMIT 1
       )
-      ORDER BY s.score DESC 
+      ORDER BY s.score DESC, s.clear_time ASC 
       LIMIT 20
     `);
     res.json(rows);
