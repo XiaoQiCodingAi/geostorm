@@ -1869,10 +1869,19 @@ function checkCollisions() {
         floatingTexts.push({ x: enemies[j].x, y: enemies[j].y - 20, text: dmgText, life: 30, color: '#ffff00' });
         
         if (pierceLeft > 0) {
-          // 穿透弹：记录已命中目标，继续原来方向
+          // 穿透弹：记录已命中目标，转向下一个敌人
           hitTargets.push(enemies[j].id);
           pierceLeft--;
           b.pierce = pierceLeft;
+          // 找下一个最近的敌人
+          let nextTarget = null, minD = Infinity;
+          enemies.forEach(e => { if (!hitTargets.includes(e.id) && e.hp > 0) { const d = Math.hypot(e.x - b.x, e.y - b.y); if (d < minD) { minD = d; nextTarget = e; } } });
+          if (boss && boss.hp > 0 && !hitTargets.includes(boss.id || 'boss')) { const d = Math.hypot(boss.x - b.x, boss.y - b.y); if (d < minD) nextTarget = boss; }
+          if (nextTarget) {
+            const newAngle = Math.atan2(nextTarget.y - b.y, nextTarget.x - b.x);
+            b.vx = Math.cos(newAngle) * Math.hypot(b.vx, b.vy);
+            b.vy = Math.sin(newAngle) * Math.hypot(b.vx, b.vy);
+          }
           continue;
         }
         hit = true;
@@ -1891,6 +1900,14 @@ function checkCollisions() {
           hitTargets.push(boss.id || 'boss');
           pierceLeft--;
           b.pierce = pierceLeft;
+          // 穿透boss后也找下一个敌人
+          let nextTarget = null, minD = Infinity;
+          enemies.forEach(e => { if (!hitTargets.includes(e.id) && e.hp > 0) { const d = Math.hypot(e.x - b.x, e.y - b.y); if (d < minD) { minD = d; nextTarget = e; } } });
+          if (nextTarget) {
+            const newAngle = Math.atan2(nextTarget.y - b.y, nextTarget.x - b.x);
+            b.vx = Math.cos(newAngle) * Math.hypot(b.vx, b.vy);
+            b.vy = Math.sin(newAngle) * Math.hypot(b.vx, b.vy);
+          }
           continue;
         }
         hit = true;
