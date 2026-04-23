@@ -2284,8 +2284,9 @@ function render() {
     if (skillStacks['blade'] > 0) {
       const bladeLevel = skillStacks['blade'] || 0;
       const bladeAngleSpan = bladeLevel === 1 ? Math.PI / 3 : bladeLevel === 2 ? Math.PI * 0.6 : Math.PI;  // 60°, 108°, 180°
+      const bladeRadiusVis = bladeLevel === 0 ? 100 : bladeLevel === 1 ? 120 : bladeLevel === 2 ? 150 : 200;
       const halfSpan = bladeAngleSpan / 2;
-      const r = 100;
+      const r = bladeRadiusVis;
       
       ctx.save();
       ctx.translate(player.x, player.y);
