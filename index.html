@@ -1079,7 +1079,7 @@ function updateEnemies() {
       const trackMult = 0.35; // 统一追踪强度
       
       if (e.type === 'circle' || e.type === 'chaser') {
-        e.y += e.speed;
+        e.y += (dy / dist) * e.speed * 0.5 + e.speed * 0.5; // 主要朝玩家，也朝下
         e.x += (dx / dist) * e.speed * trackMult;
         e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
         e.y = Math.min(e.y, GAME_HEIGHT - e.radius);
@@ -1513,7 +1513,7 @@ function updatePlayerShooting() {
   if (bladeLvl > 0) {
     meleeAngle += 0.08;
     const bladeRadius = 100;
-    const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 2 : bladeLvl === 2 ? Math.PI * 0.75 : Math.PI * 1.25;
+    const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 3 : bladeLvl === 2 ? Math.PI * 0.6 : Math.PI;  // 60/108/180度，约覆盖33%/50%
     const bladeHalf = bladeAngleSpan / 2;
     const damageLvl = progressData.upgrades.basicDamage || 0;
     const meleeDamageMod = 1 + damageLvl * 0.25;
