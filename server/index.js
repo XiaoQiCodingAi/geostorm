@@ -284,13 +284,14 @@ app.get('/api/leaderboard', async (req, res) => {
       SELECT s.*, u.username 
       FROM scores s 
       JOIN users u ON s.user_id = u.id 
-      WHERE s.id = (
+      WHERE u.username NOT IN ('xiaoqi', 'test')
+      AND s.id = (
         SELECT id FROM scores s2 
-        WHERE s2.user_id = s.user_id AND u.username NOT IN ('xiaoqi', 'test')
+        JOIN users u2 ON s2.user_id = u2.id
+        WHERE s2.user_id = s.user_id AND u2.username NOT IN ('xiaoqi', 'test')
         ORDER BY s2.score DESC, s2.clear_time ASC 
         LIMIT 1
       )
-      AND u.username NOT IN ('xiaoqi', 'test')
       ORDER BY s.score DESC, s.clear_time ASC 
       LIMIT 20
     `);
