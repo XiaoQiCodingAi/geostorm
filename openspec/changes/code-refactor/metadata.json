@@ -1,0 +1,11 @@
+{
+  "name": "code-refactor",
+  "created": "2026-04-23T15:18:00+08:00",
+  "schema": "spec-driven",
+  "status": "in_progress",
+  "progress": {
+    "modules_created": 10,
+    "index_html_integrated": false,
+    "reason": "Function dependencies between modules and index.html require extensive refactoring"
+  }
+}

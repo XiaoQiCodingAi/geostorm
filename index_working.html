@@ -240,9 +240,9 @@ input:focus { outline: none; border-color: #00ffff; }
   <button class="btn secondary" onclick="backToMenu()">返回主菜单</button>
 </div>
 
+<script src="src/constants.js"></script>
 <script>
 // ==================== API ====================
-const API_BASE = '/api/geostorm';
 let authToken = localStorage.getItem('geo_token');
 let currentUser = null;
 
@@ -257,12 +257,6 @@ let progressData = {
 };
 
 // 升级配置
-const UPGRADE_CONFIG = {
-  laserDamage: { name: '🔫 激光伤害', base: 2, perLevel: 0.4, unit: '伤害/帧', maxLevel: 3, baseCost: 50, costInc: 30 },
-  emWaveDamage: { name: '⚡ 电磁波伤害', base: 100, perLevel: 50, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
-  basicDamage: { name: '💥 基础伤害', base: 15, perLevel: 0.25, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
-  basicFireRate: { name: '🚀 基础射速', base: 14, perLevel: -0.15, unit: '帧间隔', maxLevel: 3, baseCost: 50, costInc: 30 }
-};
 
 
 function getUpgradeCost(type) {
@@ -552,67 +546,13 @@ async function init() {
 }
 
 // ==================== GAME CONSTANTS ====================
-const GAME_WIDTH = 800;
-const GAME_HEIGHT = 600;
 
-const PLAYER_RADIUS = 10;
-const PLAYER_SPEED = 5;
-const PLAYER_HIT_RADIUS = 8;
-const GRAZE_RADIUS = 25;
-const INVINCIBLE_FRAMES = 90;
 
-const BULLET_SPEED = 12;
-const BULLET_RADIUS = 6;
-const FIRE_RATE = 14;
-const DAMAGE = 15;
-const ENEMY_TYPES = {
-  // 三角形：三角箭 - 1正中+2侧角±20°
-  triangle: { hp: 30, speed: 1.2, bulletSpeed: 2.5, radius: 16, score: 150, color: '#ff4444', fireRate: 80, attackType: 'triangle' },
-  // 四边形：四角弹 - 朝四个角发射
-  square: { hp: 60, speed: 1.0, bulletSpeed: 2.0, radius: 18, score: 250, color: '#ffaa22', fireRate: 100, attackType: 'square' },
-  // 圆形：脉冲型 - 扩散脉冲环
-  circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff44aa', fireRate: 120, attackType: 'pulse' },
-  // 五边形：五连星 - 5发间隔0.3秒逐发
-  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#00ddff', fireRate: 90, attackType: 'pentagon' },
-  // 六边形：六芒脉冲 - 大脉冲+6发小弹
-  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 1.5, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
-  // 追踪者：蓄力冲刺
-  chaser: { hp: 40, speed: 2.5, bulletSpeed: 0, radius: 18, score: 300, color: '#44ff88', fireRate: 180, attackType: 'dash' },
-  // 精英：组合攻击
-  elite: { hp: 150, speed: 1.0, bulletSpeed: 2.0, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
-};
 
-const BOSS_HP = 3000;
-const BOSS_RADIUS = 40;
 
-const MAX_ENERGY = 200;
-const MAX_ELITE = 2;
-const ENERGY_PER_KILL = 10;
-const K_SKILL_COST = 200;
-const J_SKILL_SPEED_BONUS = 2;
-const J_SKILL_DAMAGE = 2;
-const ENERGY_DRAIN_RATE = 100;
-const AIM_ANGLE = 5 * Math.PI / 180;
 
-const MAX_BULLETS = 150;
 
 // ==================== 技能定义 ====================
-const ALL_SKILLS = [
-  // 穿透弹：每级穿透+1个敌人
-  { id: 'pierce', name: '穿透弹', desc: '穿透+1个敌人', type: 'weapon', stackable: true, maxStack: 3, effect: { pierceBonus: 1 } },
-  // 散弹：每级+1路子弹
-  { id: 'scatter', name: '散弹', desc: '散弹+1路', type: 'weapon', stackable: true, maxStack: 3, effect: { scatterBonus: 1 } },
-  // 激光连锁：每级+1连锁目标
-  { id: 'laser', name: '激光连锁', desc: '激光连锁+1目标', type: 'skill', stackable: true, maxStack: 3, effect: { laserChainBonus: 1 } },
-  // 电磁波：每级+1波纹
-  { id: 'emWave', name: '电磁波', desc: '电磁波+1次波纹', type: 'skill', stackable: true, maxStack: 3, effect: { emWaveBonus: 1 } },
-  // 充能加速：每级+5能量/10伤害
-  { id: 'energyCharge', name: '充能加速', desc: '每10伤害+5能量', type: 'energy', stackable: true, maxStack: 3, effect: { energyPerDamageBonus: 5 } },
-  // 蓄力弹：解锁充能炮弹，升级强化
-  { id: 'charge', name: '蓄力弹', desc: '解锁充能炮弹', type: 'weapon', stackable: true, maxStack: 3, effect: { chargeBonus: 1 } },
-  // 光刀：解锁光刀，升级扩大范围
-  { id: 'blade', name: '光刀', desc: '解锁旋转光刀', type: 'skill', stackable: true, maxStack: 3, effect: { bladeBonus: 1 } },
-];
 
 // 技能效果应用函数
 function getSkillEffect(skillId) {
@@ -624,52 +564,13 @@ function getSkillEffect(skillId) {
 }
 
 // 掉落表（临时武器buff）
-const DROP_TABLE = [
-  { id: 'energy', name: '⚡能量', icon: '⚡', desc: '+50能量', weight: 80 },
-  { id: 'shield', name: '🛡️护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 15 },
-  { id: 'heal', name: '❤️生命', icon: '❤️', desc: '恢复1条生命', weight: 5 },
-];
 
 // 掉落在场上的道具
 let activeDrops = [];
 
 // 10波次设计
-const ROGUE_WAVES = [
-  // Wave 1: 三角形教程
-  { enemies: [{type:'triangle', count:24}], eliteChance: 0 },
-  // Wave 2: 三角形 + 四边形
-  { enemies: [{type:'triangle',count:20},{type:'square',count:12}], eliteChance: 0 },
-  // Wave 3: + 圆形 + 精英×2
-  { enemies: [{type:'triangle',count:12},{type:'square',count:10},{type:'circle',count:10},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 4: + 五边形
-  { enemies: [{type:'square',count:12},{type:'circle',count:12},{type:'pentagon',count:10},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 5: BOSS + 混合
-  { enemies: [{type:'triangle',count:8},{type:'square',count:8},{type:'circle',count:8},{type:'pentagon',count:6},{type:'elite',count:2}], isBoss: true, eliteChance: 0, unlockWeapon:'laser' },
-  // Wave 6: 五边形 + 追踪者
-  { enemies: [{type:'pentagon',count:12},{type:'chaser',count:10},{type:'circle',count:10},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 7: 六边形 + 追踪者
-  { enemies: [{type:'hexagon',count:12},{type:'chaser',count:10},{type:'square',count:8},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 8: 五 + 六 + 精英×4
-  { enemies: [{type:'pentagon',count:10},{type:'hexagon',count:10},{type:'elite',count:4}], eliteChance: 0, unlockWeapon:'pierce' },
-  // Wave 9: 六 + 精英 + 追踪者
-  { enemies: [{type:'hexagon',count:12},{type:'elite',count:4},{type:'chaser',count:12}], eliteChance: 0 },
-  // Wave 10: 最终BOSS + 全敌人
-  { enemies: [{type:'triangle',count:8},{type:'square',count:8},{type:'pentagon',count:8},{type:'hexagon',count:8},{type:'elite',count:4}], isBoss: true, eliteChance: 0, unlockWeapon:'freeze' },
-];
 
 // 测试配置：test账号使用少量怪物便于测试
-const TEST_ROGUE_WAVES = [
-  { enemies: [{type:'triangle', count:3}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'square',count:2}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'square',count:2},{type:'circle',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'square',count:2},{type:'circle',count:2},{type:'pentagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'square',count:2},{type:'elite',count:1}], isBoss: true, eliteChance: 0, unlockWeapon:'laser' },
-  { enemies: [{type:'pentagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'hexagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'pentagon',count:2},{type:'hexagon',count:2},{type:'elite',count:1}], eliteChance: 0, unlockWeapon:'pierce' },
-  { enemies: [{type:'hexagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'elite',count:1}], isBoss: true, eliteChance: 0, unlockWeapon:'freeze' },
-];
 
 const WAVE_REWARDS = [5, 8, 12, 15, 30, 18, 22, 25, 30, 100];
 
@@ -1847,10 +1748,7 @@ function updatePlayer() {
 }
 
 let kWaves = []; // 支持多波纹
-const K_WAVE_SPEED = 12;
-const K_WAVE_FIXED_DAMAGE = 20;
 const K_WAVE_DAMAGE_PER_LEVEL = 15;
-const K_WAVE_INTERVAL = 15; // 波纹之间延迟帧数
 
 function tryScreenClear() {
   if (player.energy >= K_SKILL_COST) {

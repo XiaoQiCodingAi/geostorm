@@ -32,7 +32,21 @@ db.serialize(() => {
     clear_time REAL NOT NULL,
     damage_reduction INTEGER DEFAULT 0,
     graze_count INTEGER DEFAULT 0,
+    wave_reached INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )`);
+  
+  // 新增：用户进度表
+  db.run(`CREATE TABLE IF NOT EXISTS user_progress (
+    user_id INTEGER PRIMARY KEY,
+    geo_fragments INTEGER DEFAULT 0,
+    upgrades TEXT DEFAULT '{"armor":0,"engine":0,"core":0,"ammo":0,"fireRate":0}',
+    unlocked_weapons TEXT DEFAULT '["basic"]',
+    best_wave INTEGER DEFAULT 0,
+    total_games_played INTEGER DEFAULT 0,
+    total_wins INTEGER DEFAULT 0,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   )`);
 });
@@ -99,7 +113,6 @@ app.post('/api/auth/register', async (req, res) => {
   }
   
   try {
-    // Check if user exists
     const existing = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
     if (existing) {
       return res.status(409).json({ error: 'Username already exists' });
@@ -107,6 +120,9 @@ app.post('/api/auth/register', async (req, res) => {
     
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await dbRun('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
+    
+    // 初始化用户进度
+    await dbRun('INSERT INTO user_progress (user_id) VALUES (?)', [result.lastID]);
     
     const token = jwt.sign({ userId: result.lastID, username }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, userId: result.lastID, username });
@@ -148,11 +164,79 @@ app.get('/api/auth/verify', authMiddleware, (req, res) => {
   res.json({ valid: true, userId: req.userId, username: req.username });
 });
 
+// ============ PROGRESS ROUTES ============
+
+// Get user progress
+app.get('/api/progress', authMiddleware, async (req, res) => {
+  try {
+    const row = await dbGet('SELECT * FROM user_progress WHERE user_id = ?', [req.userId]);
+    if (!row) {
+      // 如果没有记录，创建一个
+      await dbRun('INSERT INTO user_progress (user_id) VALUES (?)', [req.userId]);
+      return res.json({
+        geoFragments: 0,
+        upgrades: { armor: 0, engine: 0, core: 0, ammo: 0, fireRate: 0 },
+        unlockedWeapons: ['basic'],
+        bestWave: 0,
+        totalGamesPlayed: 0,
+        totalWins: 0
+      });
+    }
+    res.json({
+      geoFragments: row.geo_fragments,
+      upgrades: JSON.parse(row.upgrades),
+      unlockedWeapons: JSON.parse(row.unlocked_weapons),
+      bestWave: row.best_wave,
+      totalGamesPlayed: row.total_games_played,
+      totalWins: row.total_wins
+    });
+  } catch (err) {
+    console.error('Get progress error:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Update user progress
+app.post('/api/progress', authMiddleware, async (req, res) => {
+  const { geoFragments, upgrades, unlockedWeapons, bestWave, totalGamesPlayed, totalWins } = req.body;
+  
+  try {
+    const existing = await dbGet('SELECT user_id FROM user_progress WHERE user_id = ?', [req.userId]);
+    
+    const upgradesStr = JSON.stringify(upgrades || { armor: 0, engine: 0, core: 0, ammo: 0, fireRate: 0 });
+    const weaponsStr = JSON.stringify(unlockedWeapons || ['basic']);
+    
+    if (existing) {
+      await dbRun(`
+        UPDATE user_progress SET 
+          geo_fragments = COALESCE(?, geo_fragments),
+          upgrades = COALESCE(?, upgrades),
+          unlocked_weapons = COALESCE(?, unlocked_weapons),
+          best_wave = COALESCE(?, best_wave),
+          total_games_played = COALESCE(?, total_games_played),
+          total_wins = COALESCE(?, total_wins),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ?
+      `, [geoFragments, upgradesStr, weaponsStr, bestWave, totalGamesPlayed, totalWins, req.userId]);
+    } else {
+      await dbRun(`
+        INSERT INTO user_progress (user_id, geo_fragments, upgrades, unlocked_weapons, best_wave, total_games_played, total_wins)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [req.userId, geoFragments || 0, upgradesStr, weaponsStr, bestWave || 0, totalGamesPlayed || 0, totalWins || 0]);
+    }
+    
+    res.json({ message: 'Progress saved' });
+  } catch (err) {
+    console.error('Update progress error:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // ============ SCORE ROUTES ============
 
 // Save score
 app.post('/api/scores', authMiddleware, async (req, res) => {
-  const { score, clearTime, damageReduction, grazeCount } = req.body;
+  const { score, clearTime, damageReduction, grazeCount, waveReached } = req.body;
   
   if (typeof score !== 'number' || score < 0) {
     return res.status(400).json({ error: 'Invalid score' });
@@ -160,8 +244,8 @@ app.post('/api/scores', authMiddleware, async (req, res) => {
   
   try {
     const result = await dbRun(
-      'INSERT INTO scores (user_id, score, clear_time, damage_reduction, graze_count) VALUES (?, ?, ?, ?, ?)',
-      [req.userId, score, clearTime || 0, damageReduction ? 1 : 0, grazeCount || 0]
+      'INSERT INTO scores (user_id, score, clear_time, damage_reduction, graze_count, wave_reached) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.userId, score, clearTime || 0, damageReduction ? 1 : 0, grazeCount || 0, waveReached || 0]
     );
     res.json({ id: result.lastID, message: 'Score saved' });
   } catch (err) {
