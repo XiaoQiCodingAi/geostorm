@@ -1566,7 +1566,7 @@ function updatePlayerShooting() {
   const bladeLvl = skillStacks['blade'] || 0;
   if (bladeLvl > 0) {
     meleeAngle += 0.08;
-    const bladeRadius = bladeLvl === 0 ? 100 : bladeLvl === 1 ? 120 : bladeLvl === 2 ? 150 : 200;
+    const bladeRadius = bladeLvl === 0 ? 100 : bladeLvl === 1 ? 110 : bladeLvl === 2 ? 120 : 130;
     const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 3 : bladeLvl === 2 ? Math.PI * 0.6 : Math.PI;  // 60/108/180度，
     const bladeHalf = bladeAngleSpan / 2;
     const damageLvl = progressData.upgrades.basicDamage || 0;
@@ -2284,7 +2284,7 @@ function render() {
     if (skillStacks['blade'] > 0) {
       const bladeLevel = skillStacks['blade'] || 0;
       const bladeAngleSpan = bladeLevel === 1 ? Math.PI / 3 : bladeLevel === 2 ? Math.PI * 0.6 : Math.PI;  // 60°, 108°, 180°
-      const bladeRadiusVis = bladeLevel === 0 ? 100 : bladeLevel === 1 ? 120 : bladeLevel === 2 ? 150 : 200;
+      const bladeRadiusVis = bladeLevel === 0 ? 100 : bladeLevel === 1 ? 110 : bladeLevel === 2 ? 120 : 130;
       const halfSpan = bladeAngleSpan / 2;
       const r = bladeRadiusVis;
       
