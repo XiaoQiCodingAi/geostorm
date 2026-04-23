@@ -78,85 +78,96 @@ const TEST_ROGUE_WAVES = [
 
 // 正式波次配置
 const ROGUE_WAVES = [
-  // 第1波：三角形为主，圆形穿插
-  { groups: [
-    { types: ['triangle'], count: 6, interval: 25 },
-    { types: ['circle'], count: 4, interval: 20 },
-    { types: ['triangle'], count: 6, interval: 25 },
-    { types: ['circle'], count: 4, interval: 20 },
-    { types: ['triangle'], count: 6, interval: 25 },
-  ], eliteChance: 0.1 },
-  // 第2波：方形+圆形
-  { groups: [
-    { types: ['square'], count: 5, interval: 25 },
-    { types: ['circle'], count: 5, interval: 20 },
-    { types: ['square'], count: 5, interval: 25 },
-    { types: ['circle'], count: 5, interval: 20 },
-    { types: ['triangle'], count: 6, interval: 25 },
-  ], eliteChance: 0.15 },
-  // 第3波：混合型
-  { groups: [
-    { types: ['circle'], count: 5, interval: 20 },
-    { types: ['triangle'], count: 6, interval: 25 },
-    { types: ['square'], count: 5, interval: 25 },
-    { types: ['circle', 'triangle'], count: 4, mixed: true, interval: 30 },
-    { types: ['square', 'circle'], count: 4, mixed: true, interval: 25 },
-  ], eliteChance: 0.2 },
-  // 第4波：加入追踪者
+  // 第1波：20 - 三角形为主
   { groups: [
     { types: ['triangle'], count: 5, interval: 25 },
-    { types: ['chaser'], count: 4, interval: 40 },
-    { types: ['square'], count: 5, interval: 25 },
-    { types: ['chaser'], count: 4, interval: 40 },
+    { types: ['circle'], count: 3, interval: 20 },
+    { types: ['triangle'], count: 5, interval: 25 },
+    { types: ['circle'], count: 3, interval: 20 },
+    { types: ['triangle'], count: 4, interval: 25 },
+  ], eliteChance: 0.1 },
+  // 第2波：21 - 方形+圆形
+  { groups: [
+    { types: ['square'], count: 4, interval: 25 },
+    { types: ['circle'], count: 4, interval: 20 },
+    { types: ['square'], count: 4, interval: 25 },
+    { types: ['circle'], count: 4, interval: 20 },
+    { types: ['triangle'], count: 5, interval: 25 },
+  ], eliteChance: 0.15 },
+  // 第3波：22 - 混合型
+  { groups: [
+    { types: ['circle'], count: 4, interval: 20 },
+    { types: ['triangle'], count: 5, interval: 25 },
+    { types: ['square'], count: 4, interval: 25 },
     { types: ['circle', 'triangle'], count: 4, mixed: true, interval: 30 },
+    { types: ['square', 'circle'], count: 5, mixed: true, interval: 25 },
+  ], eliteChance: 0.2 },
+  // 第4波：23 - 加入追踪者
+  { groups: [
+    { types: ['triangle'], count: 5, interval: 25 },
+    { types: ['chaser'], count: 3, interval: 40 },
+    { types: ['square'], count: 5, interval: 25 },
+    { types: ['chaser'], count: 3, interval: 40 },
+    { types: ['circle', 'triangle'], count: 4, mixed: true, interval: 30 },
+    { types: ['circle'], count: 3, interval: 20 },
   ], eliteChance: 0.25 },
-  // 第5波BOSS：多种敌人混合+精英
+  // 第5波BOSS：24 - 多种敌人混合
   { groups: [
     { types: ['triangle'], count: 5, interval: 20 },
     { types: ['square'], count: 5, interval: 20 },
-    { types: ['circle'], count: 5, interval: 20 },
+    { types: ['circle'], count: 4, interval: 20 },
     { types: ['chaser'], count: 4, interval: 35 },
     { types: ['triangle', 'square', 'circle'], count: 4, mixed: true, interval: 25 },
+    { types: ['triangle'], count: 2, interval: 25 },
   ], eliteChance: 0.2, isBoss: true },
-  // 第6波：加入五边形
+  // 第6波：25 - 加入五边形
   { groups: [
     { types: ['triangle'], count: 5, interval: 20 },
-    { types: ['pentagon'], count: 4, interval: 40 },
+    { types: ['pentagon'], count: 3, interval: 40 },
     { types: ['square'], count: 5, interval: 20 },
-    { types: ['pentagon'], count: 4, interval: 40 },
+    { types: ['pentagon'], count: 3, interval: 40 },
     { types: ['circle', 'triangle'], count: 4, mixed: true, interval: 25 },
-    { types: ['pentagon'], count: 4, interval: 40 },
+    { types: ['pentagon'], count: 3, interval: 40 },
+    { types: ['circle'], count: 2, interval: 20 },
   ], eliteChance: 0.3 },
-  // 第7波：五边形为主
+  // 第7波：26 - 五边形为主
   { groups: [
-    { types: ['pentagon'], count: 5, interval: 35 },
+    { types: ['pentagon'], count: 4, interval: 35 },
     { types: ['square'], count: 5, interval: 25 },
-    { types: ['pentagon'], count: 5, interval: 35 },
-    { types: ['circle'], count: 5, interval: 20 },
+    { types: ['pentagon'], count: 4, interval: 35 },
+    { types: ['circle'], count: 4, interval: 20 },
     { types: ['pentagon', 'triangle'], count: 4, mixed: true, interval: 30 },
+    { types: ['square'], count: 3, interval: 25 },
+    { types: ['circle'], count: 2, interval: 20 },
   ], eliteChance: 0.25 },
-  // 第8波：加入六边形
+  // 第8波：27 - 加入六边形
   { groups: [
-    { types: ['hexagon'], count: 4, interval: 45 },
-    { types: ['pentagon'], count: 5, interval: 35 },
-    { types: ['hexagon'], count: 4, interval: 45 },
-    { types: ['chaser'], count: 5, interval: 35 },
+    { types: ['hexagon'], count: 3, interval: 45 },
+    { types: ['pentagon'], count: 4, interval: 35 },
+    { types: ['hexagon'], count: 3, interval: 45 },
+    { types: ['chaser'], count: 4, interval: 35 },
     { types: ['hexagon', 'pentagon'], count: 4, mixed: true, interval: 40 },
+    { types: ['triangle'], count: 4, interval: 25 },
+    { types: ['circle'], count: 3, interval: 20 },
+    { types: ['square'], count: 2, interval: 25 },
   ], eliteChance: 0.2 },
-  // 第9波：全怪物大混战
+  // 第9波：28 - 全怪物大混战
   { groups: [
-    { types: ['triangle', 'circle'], count: 5, mixed: true, interval: 20 },
+    { types: ['triangle', 'circle'], count: 4, mixed: true, interval: 20 },
     { types: ['square', 'pentagon'], count: 4, mixed: true, interval: 30 },
     { types: ['hexagon', 'chaser'], count: 4, mixed: true, interval: 35 },
     { types: ['triangle', 'square', 'circle'], count: 4, mixed: true, interval: 25 },
     { types: ['pentagon', 'hexagon'], count: 4, mixed: true, interval: 30 },
+    { types: ['chaser'], count: 4, interval: 35 },
+    { types: ['triangle', 'circle'], count: 4, mixed: true, interval: 20 },
   ], eliteChance: 0.25 },
-  // 第10波最终BOSS：全精英
+  // 第10波最终BOSS：29 - 全精英
   { groups: [
-    { types: ['elite'], count: 8, interval: 30 },
-    { types: ['elite'], count: 8, interval: 25 },
-    { types: ['elite'], count: 8, interval: 25 },
-    { types: ['elite', 'triangle'], count: 6, mixed: true, interval: 30 },
+    { types: ['elite'], count: 7, interval: 30 },
+    { types: ['elite'], count: 7, interval: 25 },
+    { types: ['elite'], count: 7, interval: 25 },
+    { types: ['elite', 'triangle'], count: 5, mixed: true, interval: 30 },
+    { types: ['elite'], count: 3, interval: 20 },
     { types: ['elite'], count: 6, interval: 20 },
   ], eliteChance: 0, isBoss: true }
 ];
