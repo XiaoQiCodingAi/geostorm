@@ -1485,6 +1485,7 @@ function showGameOver(isVictory) {
     title.style.color = '#ff4444';
     stats.innerHTML = `
       <p>到达波次：第${currentWave + 1}波</p>
+      <p>用时：${Math.floor(clearTime)}秒</p>
       <p>本局获得：💎 +${totalEarnedFragments}</p>
       <p style="margin-top:15px;color:#ffff00;">⭐ 总分: ${finalScore}</p>
       <button class="btn" onclick="showLeaderboardFromEnd()" style="margin-top:20px;">🏆 查看排行榜</button>
