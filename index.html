@@ -1079,8 +1079,8 @@ function updateEnemies() {
       const trackMult = 0.35; // 统一追踪强度
       
       if (e.type === 'circle' || e.type === 'chaser') {
-        e.y += (dy / dist) * e.speed * 0.5 + e.speed * 0.5; // 主要朝玩家，也朝下
-        e.x += (dx / dist) * e.speed * trackMult;
+        e.y += (dy / dist) * e.speed;
+        e.x += (dx / dist) * e.speed;
         e.x = Math.max(e.radius, Math.min(GAME_WIDTH - e.radius, e.x));
         e.y = Math.min(e.y, GAME_HEIGHT - e.radius);
       } else if (e.type === 'triangle' || e.type === 'pentagon') {
