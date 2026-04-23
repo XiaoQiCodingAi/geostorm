@@ -47,7 +47,7 @@ const ENEMY_TYPES = {
   // 圆形：脉冲型 - 扩散脉冲环
   circle: { hp: 30, speed: 1.6, bulletSpeed: 0, radius: 15, score: 100, color: '#ff44aa', fireRate: 120, attackType: 'pulse' },
   // 五边形：五连星 - 5发间隔0.3秒逐发
-  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#ff8800', fireRate: 90, attackType: 'pentagon' },
+  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#ff8800', fireRate: 45, attackType: 'pentagon' },
   // 六边形：六芒脉冲 - 大脉冲+6发小弹
   hexagon: { hp: 100, speed: 0.8, bulletSpeed: 1.5, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
   // 追踪者：蓄力冲刺
