@@ -838,7 +838,7 @@ function updateWaveSpawning() {
   
   // Spawn enemies from queue
   waveSpawnTimer++;
-  const spawnInterval = 45; // 每45帧生成一个
+  const spawnInterval = 68; // 每68帧生成一个(1.5倍慢)
   
   if (waveSpawnTimer >= spawnInterval) {
     waveSpawnTimer = 0;
