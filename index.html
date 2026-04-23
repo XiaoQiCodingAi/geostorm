@@ -1566,12 +1566,12 @@ function updatePlayerShooting() {
   const bladeLvl = skillStacks['blade'] || 0;
   if (bladeLvl > 0) {
     meleeAngle += 0.08;
-    const bladeRadius = 100;
-    const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 3 : bladeLvl === 2 ? Math.PI * 0.6 : Math.PI;  // 60/108/180度，约覆盖33%/50%
+    const bladeRadius = bladeLvl === 1 ? 120 : bladeLvl === 2 ? 150 : 200;
+    const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 3 : bladeLvl === 2 ? Math.PI * 0.6 : Math.PI;  // 60/108/180度，
     const bladeHalf = bladeAngleSpan / 2;
     const damageLvl = progressData.upgrades.basicDamage || 0;
     const meleeDamageMod = getUpgradeValue('basicDamage') / DAMAGE;
-    const bladeDamage = 50 * meleeDamageMod * (1 + bladeLvl * 0.25);
+    const bladeDamage = 50 * meleeDamageMod;
     
     // 销毁敌弹
     for (let i = enemyBullets.length - 1; i >= 0; i--) {
