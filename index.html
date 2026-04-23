@@ -2433,7 +2433,7 @@ function render() {
   }
   
   // 通关时间
-  const totalSeconds = Math.floor(gameTime / 60);
+  const totalSeconds = Math.floor(gameTime);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   const timeStr = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
