@@ -16,7 +16,7 @@ const INVINCIBLE_FRAMES = 90;
 // 子弹属性
 const BULLET_SPEED = 12;
 const BULLET_RADIUS = 6;
-const FIRE_RATE = 14;
+const FIRE_RATE = 18;
 const DAMAGE = 15;
 const MAX_BULLETS = 150;
 
