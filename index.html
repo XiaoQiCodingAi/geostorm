@@ -2459,7 +2459,7 @@ function render() {
   const seconds = totalSeconds % 60;
   const timeStr = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
   ctx.fillStyle = '#ffff00'; ctx.font = 'bold 14px Courier New'; ctx.textAlign = 'right';
-  ctx.fillText('⏱️ ' + timeStr, GAME_WIDTH - 10, GAME_HEIGHT - 15);
+  ctx.fillText('🎯 ' + score, GAME_WIDTH - 10, GAME_HEIGHT - 30); ctx.fillText('⏱️ ' + timeStr, GAME_WIDTH - 10, GAME_HEIGHT - 15);
 
   // Active skills
   let skillX = 10; ctx.textAlign = 'left';
