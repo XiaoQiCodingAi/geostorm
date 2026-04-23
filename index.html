@@ -1354,7 +1354,7 @@ function updateBoss() {
   
   if (boss.hp <= 0) {
     for (let i = 0; i < 30; i++) particles.push({ x: boss.x, y: boss.y, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, life: 60, color: boss.color, size: 8 });
-    const bossScore = currentWave === 5 ? 1000 : 2000; // 第6关BOSS 1000分，最终BOSS 2000分
+    const bossScore = currentWave === 5 ? 5000 : 10000; // 第6关BOSS 1000分，最终BOSS 2000分
     score += bossScore;
     player.energy = getMaxEnergy();
     boss = null;
