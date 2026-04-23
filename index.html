@@ -240,9 +240,9 @@ input:focus { outline: none; border-color: #00ffff; }
   <button class="btn secondary" onclick="backToMenu()">返回主菜单</button>
 </div>
 
+<script src="src/config.js"></script>
 <script>
 // ==================== API ====================
-const API_BASE = '/api/geostorm';
 let authToken = localStorage.getItem('geo_token');
 let currentUser = null;
 
@@ -263,8 +263,6 @@ const UPGRADE_CONFIG = {
   basicDamage: { name: '💥 基础伤害', base: 15, perLevel: 0.25, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
   basicFireRate: { name: '🚀 基础射速', base: 14, perLevel: -0.15, unit: '帧间隔', maxLevel: 3, baseCost: 50, costInc: 30 }
 };
-
-
 function getUpgradeCost(type) {
   const cfg = UPGRADE_CONFIG[type];
   const level = progressData.upgrades[type] || 0;
@@ -551,69 +549,6 @@ async function init() {
   }
 }
 
-// ==================== GAME CONSTANTS ====================
-const GAME_WIDTH = 800;
-const GAME_HEIGHT = 600;
-
-const PLAYER_RADIUS = 10;
-const PLAYER_SPEED = 5;
-const PLAYER_HIT_RADIUS = 8;
-const GRAZE_RADIUS = 25;
-const INVINCIBLE_FRAMES = 90;
-
-const BULLET_SPEED = 12;
-const BULLET_RADIUS = 6;
-const FIRE_RATE = 14;
-const DAMAGE = 15;
-const ENEMY_TYPES = {
-  // 三角形：三角箭 - 1正中+2侧角±20°
-  triangle: { hp: 30, speed: 1.2, bulletSpeed: 2.5, radius: 16, score: 150, color: '#ff4444', fireRate: 80, attackType: 'triangle' },
-  // 四边形：四角弹 - 朝四个角发射
-  square: { hp: 60, speed: 1.0, bulletSpeed: 2.0, radius: 18, score: 250, color: '#ffaa22', fireRate: 100, attackType: 'square' },
-  // 圆形：脉冲型 - 扩散脉冲环
-  circle: { hp: 25, speed: 1.2, bulletSpeed: 0, radius: 15, score: 100, color: '#ff44aa', fireRate: 120, attackType: 'pulse' },
-  // 五边形：五连星 - 5发间隔0.3秒逐发
-  pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#00ddff', fireRate: 90, attackType: 'pentagon' },
-  // 六边形：六芒脉冲 - 大脉冲+6发小弹
-  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 1.5, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
-  // 追踪者：蓄力冲刺
-  chaser: { hp: 40, speed: 2.5, bulletSpeed: 0, radius: 18, score: 300, color: '#44ff88', fireRate: 180, attackType: 'dash' },
-  // 精英：组合攻击
-  elite: { hp: 150, speed: 1.0, bulletSpeed: 2.0, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
-};
-
-const BOSS_HP = 3000;
-const BOSS_RADIUS = 40;
-
-const MAX_ENERGY = 200;
-const MAX_ELITE = 2;
-const ENERGY_PER_KILL = 10;
-const K_SKILL_COST = 200;
-const J_SKILL_SPEED_BONUS = 2;
-const J_SKILL_DAMAGE = 2;
-const ENERGY_DRAIN_RATE = 100;
-const AIM_ANGLE = 5 * Math.PI / 180;
-
-const MAX_BULLETS = 150;
-
-// ==================== 技能定义 ====================
-const ALL_SKILLS = [
-  // 穿透弹：每级穿透+1个敌人
-  { id: 'pierce', name: '穿透弹', desc: '穿透+1个敌人', type: 'weapon', stackable: true, maxStack: 3, effect: { pierceBonus: 1 } },
-  // 散弹：每级+1路子弹
-  { id: 'scatter', name: '散弹', desc: '散弹+1路', type: 'weapon', stackable: true, maxStack: 3, effect: { scatterBonus: 1 } },
-  // 激光连锁：每级+1连锁目标
-  { id: 'laser', name: '激光连锁', desc: '激光连锁+1目标', type: 'skill', stackable: true, maxStack: 3, effect: { laserChainBonus: 1 } },
-  // 电磁波：每级+1波纹
-  { id: 'emWave', name: '电磁波', desc: '电磁波+1次波纹', type: 'skill', stackable: true, maxStack: 3, effect: { emWaveBonus: 1 } },
-  // 充能加速：每级+5能量/10伤害
-  { id: 'energyCharge', name: '充能加速', desc: '每10伤害+5能量', type: 'energy', stackable: true, maxStack: 3, effect: { energyPerDamageBonus: 5 } },
-  // 蓄力弹：解锁充能炮弹，升级强化
-  { id: 'charge', name: '蓄力弹', desc: '解锁充能炮弹', type: 'weapon', stackable: true, maxStack: 3, effect: { chargeBonus: 1 } },
-  // 光刀：解锁光刀，升级扩大范围
-  { id: 'blade', name: '光刀', desc: '解锁旋转光刀', type: 'skill', stackable: true, maxStack: 3, effect: { bladeBonus: 1 } },
-];
-
 // 技能效果应用函数
 function getSkillEffect(skillId) {
   const level = skillStacks[skillId] || 0;
@@ -623,59 +558,12 @@ function getSkillEffect(skillId) {
   return skill.effect[Object.keys(skill.effect)[0]] * level;
 }
 
-// 掉落表（临时武器buff）
-const DROP_TABLE = [
-  { id: 'energy', name: '⚡能量', icon: '⚡', desc: '+50能量', weight: 80 },
-  { id: 'shield', name: '🛡️护盾', icon: '🛡️', desc: '抵挡1次伤害', weight: 15 },
-  { id: 'heal', name: '❤️生命', icon: '❤️', desc: '恢复1条生命', weight: 5 },
-];
+// 掉落表（已移到 config.js）
 
 // 掉落在场上的道具
 let activeDrops = [];
 
-// 10波次设计
-const ROGUE_WAVES = [
-  // Wave 1: 三角形教程
-  { enemies: [{type:'triangle', count:24}], eliteChance: 0 },
-  // Wave 2: 三角形 + 四边形
-  { enemies: [{type:'triangle',count:20},{type:'square',count:12}], eliteChance: 0 },
-  // Wave 3: + 圆形 + 精英×2
-  { enemies: [{type:'triangle',count:12},{type:'square',count:10},{type:'circle',count:10},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 4: + 五边形
-  { enemies: [{type:'square',count:12},{type:'circle',count:12},{type:'pentagon',count:10},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 5: BOSS + 混合
-  { enemies: [{type:'triangle',count:8},{type:'square',count:8},{type:'circle',count:8},{type:'pentagon',count:6},{type:'elite',count:2}], isBoss: true, eliteChance: 0, unlockWeapon:'laser' },
-  // Wave 6: 五边形 + 追踪者
-  { enemies: [{type:'pentagon',count:12},{type:'chaser',count:10},{type:'circle',count:10},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 7: 六边形 + 追踪者
-  { enemies: [{type:'hexagon',count:12},{type:'chaser',count:10},{type:'square',count:8},{type:'elite',count:2}], eliteChance: 0 },
-  // Wave 8: 五 + 六 + 精英×4
-  { enemies: [{type:'pentagon',count:10},{type:'hexagon',count:10},{type:'elite',count:4}], eliteChance: 0, unlockWeapon:'pierce' },
-  // Wave 9: 六 + 精英 + 追踪者
-  { enemies: [{type:'hexagon',count:12},{type:'elite',count:4},{type:'chaser',count:12}], eliteChance: 0 },
-  // Wave 10: 最终BOSS + 全敌人
-  { enemies: [{type:'triangle',count:8},{type:'square',count:8},{type:'pentagon',count:8},{type:'hexagon',count:8},{type:'elite',count:4}], isBoss: true, eliteChance: 0, unlockWeapon:'freeze' },
-];
-
-// 测试配置：test账号使用少量怪物便于测试
-const TEST_ROGUE_WAVES = [
-  { enemies: [{type:'triangle', count:3}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'square',count:2}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'square',count:2},{type:'circle',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'square',count:2},{type:'circle',count:2},{type:'pentagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'square',count:2},{type:'elite',count:1}], isBoss: true, eliteChance: 0, unlockWeapon:'laser' },
-  { enemies: [{type:'pentagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'hexagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'pentagon',count:2},{type:'hexagon',count:2},{type:'elite',count:1}], eliteChance: 0, unlockWeapon:'pierce' },
-  { enemies: [{type:'hexagon',count:2},{type:'elite',count:1}], eliteChance: 0 },
-  { enemies: [{type:'triangle',count:2},{type:'elite',count:1}], isBoss: true, eliteChance: 0, unlockWeapon:'freeze' },
-];
-
-const WAVE_REWARDS = [5, 8, 12, 15, 30, 18, 22, 25, 30, 100];
-
-
-
-
+// 波次设计（已移到 config.js）
 // ==================== GAME STATE ====================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1026,7 +914,8 @@ function checkWaveComplete() {
     saveProgress();
     
     // Check if game complete
-    if (currentWave >= ROGUE_WAVES.length - 1) {
+    const maxWave = (currentUser === 'test') ? TEST_ROGUE_WAVES.length - 1 : ROGUE_WAVES.length - 1;
+    if (currentWave >= maxWave) {
       // Victory!
       gameState = 'clear';
       finalScore = score + 5000;
@@ -1070,11 +959,32 @@ function showSkillSelect() {
   pendingSkillChoices.forEach((skill, i) => {
     const currentLvl = skillStacks[skill.id] || 0;
     const maxLvl = skill.maxStack;
+    const nextLvl = currentLvl + 1;
+    // 动态显示升级效果
+    let upgradeDesc = skill.desc;
+    if (skill.stackable && nextLvl > 0) {
+      if (skill.id === 'blade') {
+        const ranges = ['解锁旋转光刀', '范围 +25%', '范围 +50%', '范围 +75%'];
+        upgradeDesc = ranges[Math.min(nextLvl, 3)];
+      } else if (skill.id === 'scatter') {
+        upgradeDesc = `散弹 +1路 (当前${1 + nextLvl}路)`;
+      } else if (skill.id === 'pierce') {
+        upgradeDesc = `穿透 +1个 (当前${nextLvl}个)`;
+      } else if (skill.id === 'laser') {
+        upgradeDesc = `连锁 +1目标 (当前${1 + nextLvl}个)`;
+      } else if (skill.id === 'emWave') {
+        upgradeDesc = `波纹 +1次 (当前${1 + nextLvl}次)`;
+      } else if (skill.id === 'charge') {
+        upgradeDesc = nextLvl === 1 ? '解锁充能炮弹' : '伤害 +50%';
+      } else if (skill.id === 'energyCharge') {
+        upgradeDesc = `击杀能量 +5 (当前${10 + nextLvl * 5})`;
+      }
+    }
     const stackInfo = skill.stackable ? `<div class="叠加">当前 Lv.${currentLvl}/${maxLvl}</div>` : '';
     html += `
       <div class="skill-card" onclick="selectSkill(${i})">
         <div class="name">${skill.name}</div>
-        <div class="desc">${skill.desc}</div>
+        <div class="desc">${upgradeDesc}</div>
         ${stackInfo}
         <div style="color:#666;font-size:12px;margin-top:10px;">按 ${i+1} 选择</div>
       </div>
@@ -1248,11 +1158,9 @@ function updateEnemies() {
       }
       score += e.score;
       
-      // Energy gain: 基础10 + 充能加速加成(如果有)
+      // Energy gain: 击杀充能
       const eg = getEnergyGain();
-      const bonusPerDamage = eg.perDamage > 10 ? (eg.perDamage - 10) / 10 : 0; // 超出基础10的部分
-      const energyFromKill = eg.flat + bonusPerDamage * e.maxHp; // 只有充能加速技能才增加额外能量
-      player.energy = Math.min(getMaxEnergy(), player.energy + energyFromKill);
+      player.energy = Math.min(getMaxEnergy(), player.energy + eg.flat);
       
       // Elite count decrement (drop temporarily disabled)
       if (e.isElite) {
@@ -1375,6 +1283,7 @@ function spawnDrop(x, y) {
   for (const drop of DROP_TABLE) {
     rand -= drop.weight;
     if (rand <= 0) {
+      if (drop.id === 'none') return; // 无掉落
       activeDrops.push({ ...drop, x, y, bobPhase: Math.random() * Math.PI * 2, timer: 1800 }); // 添加到场上道具
       break;
     }
@@ -1416,12 +1325,10 @@ function getMaxEnergy() {
 }
 
 function getEnergyGain() {
-  // 旧版击杀充能（保留基础值）
-  let gain = ENERGY_PER_KILL;
-  // 新版充能加速：每10点伤害获得能量
+  // 击杀充能：基础10 + 充能加速每级+5
   const energyChargeLevel = skillStacks['energyCharge'] || 0;
-  const energyPerDamage = 10 + energyChargeLevel * 5; // 10,15,20,25,30
-  return { flat: gain, perDamage: energyPerDamage };
+  const gain = ENERGY_PER_KILL + energyChargeLevel * 5; // 10,15,20,25,30
+  return { flat: gain };
 }
 
 function updateBoss() {
@@ -1612,6 +1519,68 @@ async function submitScore(finalScore, clearTime) {
 }
 
 function updatePlayerShooting() {
+  // 光刀（独立技能，可销毁敌弹）- 即使激光激活也继续旋转
+  const bladeLvl = skillStacks['blade'] || 0;
+  if (bladeLvl > 0) {
+    meleeAngle += 0.08;
+    const bladeRadius = 100;
+    const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 2 : bladeLvl === 2 ? Math.PI * 0.75 : Math.PI * 1.25;
+    const bladeHalf = bladeAngleSpan / 2;
+    const damageLvl = progressData.upgrades.basicDamage || 0;
+    const meleeDamageMod = 1 + damageLvl * 0.25;
+    const bladeDamage = DAMAGE * 1.5 * meleeDamageMod * (1 + bladeLvl * 0.25);
+    
+    // 销毁敌弹
+    for (let i = enemyBullets.length - 1; i >= 0; i--) {
+      const eb = enemyBullets[i];
+      const dist = Math.hypot(eb.x - player.x, eb.y - player.y);
+      if (dist < bladeRadius + eb.radius && dist > bladeRadius * 0.3) {
+        const ang = Math.atan2(eb.y - player.y, eb.x - player.x);
+        let angleDiff = ang - meleeAngle;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        if (Math.abs(angleDiff) < bladeHalf) {
+          enemyBullets.splice(i, 1);
+          grazeCount++;
+        }
+      }
+    }
+    
+    // 光刀伤害敌人
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      if (e.hp <= 0) continue;
+      const dist = Math.hypot(e.x - player.x, e.y - player.y);
+      if (dist < bladeRadius + e.radius && dist > bladeRadius * 0.3) {
+        const ang = Math.atan2(e.y - player.y, e.x - player.x);
+        let angleDiff = ang - meleeAngle;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        if (Math.abs(angleDiff) < bladeHalf) {
+          e.hp -= bladeDamage;
+          floatingTexts.push({ x: e.x, y: e.y - 20, text: Math.floor(bladeDamage).toString(), life: 30, color: '#00ffff' });
+        }
+      }
+    }
+    // Boss伤害
+    if (boss && boss.hp > 0) {
+      const dist = Math.hypot(boss.x - player.x, boss.y - player.y);
+      if (dist < bladeRadius + boss.radius && dist > bladeRadius * 0.3) {
+        const ang = Math.atan2(boss.y - player.y, boss.x - player.x);
+        let normAng = ang;
+        while (normAng < 0) normAng += Math.PI * 2;
+        let ns = meleeAngle - bladeHalf, ne = meleeAngle + bladeHalf;
+        while (ns < 0) ns += Math.PI * 2;
+        while (ne < 0) ne += Math.PI * 2;
+        let inArc = (bladeAngleSpan >= Math.PI * 2) || (ns <= ne ? (normAng >= ns && normAng <= ne) : (normAng >= ns || normAng <= ne));
+        if (inArc) {
+          boss.hp -= bladeDamage;
+          floatingTexts.push({ x: boss.x, y: boss.y - 40, text: Math.floor(bladeDamage).toString(), life: 30, color: '#ff66aa' });
+        }
+      }
+    }
+  }
+
   if (!player.jSkillActive) {
     player.fireTimer++;
     
@@ -1627,15 +1596,12 @@ function updatePlayerShooting() {
     const baseDamage = DAMAGE * (1 + damageLvl * 0.25);
     const bulletSpeedMod = 1 + damageLvl * 0.10;
     const chargeDamage = baseDamage * 5;
-    const meleeDamageMod = 1 + damageLvl * 0.25;
     
     // ========== 蓄力弹（独立技能，只要学会就自动发射） ==========
     const chargeLvl = skillStacks['charge'] || 0;
     if (chargeLvl > 0) {
       chargeTimer++;
-      // Lv.1: 120帧间隔, Lv.3: 80帧间隔（+50%频率）
       const chargeInterval = chargeLvl >= 3 ? 80 : 120;
-      // Lv.2+: 伤害+50%
       const chargeDmgMult = chargeLvl >= 2 ? 1.5 : 1;
       const finalChargeDamage = chargeDamage * chargeDmgMult;
       if (chargeTimer >= chargeInterval) {
@@ -1653,73 +1619,6 @@ function updatePlayerShooting() {
         }
       }
     }
-
-    // ========== 光刀（独立技能，可销毁敌弹） ==========
-    const bladeLvl = skillStacks['blade'] || 0;
-    if (bladeLvl > 0) {
-      meleeAngle += 0.08;
-      const bladeRadius = 100;
-      // Lv.1: 90°, Lv.2: 135°, Lv.3: 225°
-      const bladeAngleSpan = bladeLvl === 1 ? Math.PI / 2 : bladeLvl === 2 ? Math.PI * 0.75 : Math.PI * 1.25; // 90°, 135°, 225°
-      const bladeHalf = bladeAngleSpan / 2;
-      const bladeDamage = DAMAGE * 1.5 * meleeDamageMod * (1 + bladeLvl * 0.25);
-      let bladeStart = meleeAngle - bladeHalf;
-      let bladeEnd = meleeAngle + bladeHalf;
-      
-      // 销毁敌弹
-      for (let i = enemyBullets.length - 1; i >= 0; i--) {
-        const eb = enemyBullets[i];
-        const dist = Math.hypot(eb.x - player.x, eb.y - player.y);
-        if (dist < bladeRadius + eb.radius && dist > bladeRadius * 0.3) {
-          const ang = Math.atan2(eb.y - player.y, eb.x - player.x);
-          let normAng = ang, ns = bladeStart, ne = bladeEnd;
-          while (normAng < 0) normAng += Math.PI * 2;
-          while (ns < 0) ns += Math.PI * 2;
-          while (ne < 0) ne += Math.PI * 2;
-          let inArc = (bladeAngleSpan >= Math.PI * 2) || (ns <= ne ? (normAng >= ns && normAng <= ne) : (normAng >= ns || normAng <= ne));
-          if (inArc) {
-            enemyBullets.splice(i, 1);
-            grazeCount++;
-            continue;
-          }
-        }
-      }
-      
-      // 光刀伤害敌人
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        if (e.hp <= 0) continue;
-        const dist = Math.hypot(e.x - player.x, e.y - player.y);
-        if (dist < bladeRadius + e.radius && dist > bladeRadius * 0.3) {
-          const ang = Math.atan2(e.y - player.y, e.x - player.x);
-          let normAng = ang, ns = bladeStart, ne = bladeEnd;
-          while (normAng < 0) normAng += Math.PI * 2;
-          while (ns < 0) ns += Math.PI * 2;
-          while (ne < 0) ne += Math.PI * 2;
-          let inArc = (bladeAngleSpan >= Math.PI * 2) || (ns <= ne ? (normAng >= ns && normAng <= ne) : (normAng >= ns || normAng <= ne));
-          if (inArc) {
-            e.hp -= bladeDamage;
-            floatingTexts.push({ x: e.x, y: e.y - 20, text: Math.floor(bladeDamage).toString(), life: 30, color: '#00ffff' });
-          }
-        }
-      }
-      // Boss伤害
-      if (boss && boss.hp > 0) {
-        const dist = Math.hypot(boss.x - player.x, boss.y - player.y);
-        if (dist < bladeRadius + boss.radius && dist > bladeRadius * 0.3) {
-          const ang = Math.atan2(boss.y - player.y, boss.x - player.x);
-          let normAng = ang, ns = bladeStart, ne = bladeEnd;
-          while (normAng < 0) normAng += Math.PI * 2;
-          while (ns < 0) ns += Math.PI * 2;
-          while (ne < 0) ne += Math.PI * 2;
-          let inArc = (bladeAngleSpan >= Math.PI * 2) || (ns <= ne ? (normAng >= ns && normAng <= ne) : (normAng >= ns || normAng <= ne));
-          if (inArc) {
-            boss.hp -= bladeDamage;
-            floatingTexts.push({ x: boss.x, y: boss.y - 40, text: Math.floor(bladeDamage).toString(), life: 30, color: '#ff66aa' });
-          }
-        }
-      }
-    }
     
     if (player.fireTimer >= effectiveFireRate) {
       player.fireTimer = 0;
@@ -1733,16 +1632,40 @@ function updatePlayerShooting() {
         angle += (Math.random() - 0.5) * AIM_ANGLE;
         
         // 散弹：根据skillLevel决定路数
-        if (weaponMode === 'scatter') {
+        if (skillStacks['scatter'] > 0) {
           const scatterLevel = skillStacks['scatter'] || 0;
           const bulletCount = 1 + scatterLevel; // 1-3级对应2-4路
-          const spreadAngle = Math.PI / 4; // 45度扇形
+          const spreadAngle = Math.PI / 9; // 20度扇形
           for (let i = 0; i < bulletCount; i++) {
-            const offsetAngle = (bulletCount > 1) ? spreadAngle * (i / (bulletCount - 1) - 0.5) : 0;
+            let offsetAngle;
+            if (bulletCount === 1) {
+              offsetAngle = 0;
+            } else if (bulletCount % 2 === 1) {
+              // 奇数: 对称分布，中心朝前
+              offsetAngle = spreadAngle * (i / ((bulletCount - 1) / 2) - 1);
+            } else {
+              // 偶数: 中间子弹朝前，其余两侧分布
+              const half = bulletCount / 2;
+              if (i === half) {
+                offsetAngle = 0; // 中间子弹朝前
+              } else {
+                // 左侧 (i < half) 或右侧 (i > half)
+                const sideIndex = i < half ? i : i - half - 1;
+                const sideCount = half - 1;
+                const sideOffset = sideCount > 0 ? (sideIndex + 1) / sideCount : 1;
+                if (i < half) {
+                  offsetAngle = -spreadAngle * sideOffset * 0.8;
+                } else {
+                  offsetAngle = spreadAngle * sideOffset * 0.8;
+                }
+              }
+            }
             const a = angle + offsetAngle;
-            playerBullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * BULLET_SPEED * bulletSpeedMod, vy: Math.sin(a) * BULLET_SPEED * bulletSpeedMod, radius: 5, damage: baseDamage * 0.7, target: null });
+            const pierceLevel = skillStacks['pierce'] || 0;
+            const pierceCount = 1 + pierceLevel;
+            playerBullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * BULLET_SPEED * bulletSpeedMod, vy: Math.sin(a) * BULLET_SPEED * bulletSpeedMod, radius: 5, damage: baseDamage * 0.7, pierce: pierceCount, hitTargets: [], target: null });
           }
-        } else if (weaponMode === 'pierce') {
+        } else if (skillStacks['pierce'] > 0) {
           const pierceLevel = skillStacks['pierce'] || 0;
           const pierceCount = 1 + pierceLevel; // 1-3穿透
           playerBullets.push({ x: player.x, y: player.y, vx: Math.cos(angle) * BULLET_SPEED * bulletSpeedMod, vy: Math.sin(angle) * BULLET_SPEED * bulletSpeedMod, radius: 5, damage: baseDamage, pierce: pierceCount, hitTargets: [], target: null });
@@ -1802,7 +1725,7 @@ function updatePlayer() {
       });
       
       // 连锁攻击：查找其他目标
-      const chainRange = 150;
+      const chainRange = Math.hypot(GAME_WIDTH, GAME_HEIGHT);
       for (let chain = 0; chain < laserChainLevel + 1; chain++) { // Lv.1连锁2个, Lv.2连锁3个, Lv.3连锁4个
         let nearest = null, nearestDist = Infinity;
         const lastTarget = laserHitTargets[laserHitTargets.length - 1];
@@ -1814,14 +1737,14 @@ function updatePlayer() {
             nearest = e;
           }
         });
-        if (nearest) {
+        if (nearest && Math.hypot(nearest.x - lastTarget.x, nearest.y - lastTarget.y) > 30) {
           laserHitTargets.push(nearest);
           nearest.hp -= chainDamage;
           floatingTexts.push({ x: nearest.x, y: nearest.y - 20, text: chainDamage.toFixed(0), life: 30, color: '#ff8800' });
         }
       }
       
-      if (boss && boss.hp > 0 && !laserHitTargets.includes(boss)) {
+      if (boss && boss.hp > 0) {
         // 检查boss是否在主激光路径上
         const laserAngle = Math.atan2(jLaserTarget.y - player.y, jLaserTarget.x - player.x);
         const laserLength = Math.hypot(jLaserTarget.x - player.x, jLaserTarget.y - player.y);
@@ -1832,6 +1755,16 @@ function updatePlayer() {
           const closestY = player.y + Math.sin(laserAngle) * dot;
           const dist = Math.hypot(boss.x - closestX, boss.y - closestY);
           if (dist <= boss.radius + 5) boss.hp -= laserDamage;
+        }
+        // Boss 也参与连锁
+        if (!laserHitTargets.includes(boss) && boss.hp > 0) {
+          const lastTarget = laserHitTargets[laserHitTargets.length - 1];
+          const d = Math.hypot(boss.x - lastTarget.x, boss.y - lastTarget.y);
+          if (d <= chainRange && d > 30) {
+            laserHitTargets.push(boss);
+            boss.hp -= chainDamage;
+            floatingTexts.push({ x: boss.x, y: boss.y - 40, text: chainDamage.toFixed(0), life: 30, color: '#ff8800' });
+          }
         }
       }
     }
@@ -1934,27 +1867,8 @@ function checkCollisions() {
         floatingTexts.push({ x: enemies[j].x, y: enemies[j].y - 20, text: dmgText, life: 30, color: '#ffff00' });
         
         if (pierceLeft > 0) {
-          // 穿透弹：记录已命中目标，找下一个目标
+          // 穿透弹：记录已命中目标，继续原来方向
           hitTargets.push(enemies[j].id);
-          // 找最近的未命中目标并改变方向
-          let nearest = null, nearestDist = Infinity;
-          enemies.forEach(e => {
-            if (!hitTargets.includes(e.id) && e.hp > 0) {
-              const d = Math.hypot(b.x - e.x, b.y - e.y);
-              if (d < nearestDist) { nearestDist = d; nearest = e; }
-            }
-          });
-          if (boss && boss.hp > 0 && !hitTargets.includes(boss.id || 'boss')) {
-            const d = Math.hypot(b.x - boss.x, b.y - boss.y);
-            if (d < nearestDist) nearest = boss;
-          }
-          if (nearest) {
-            const newAngle = Math.atan2(nearest.y - b.y, nearest.x - b.x);
-            const speed = Math.hypot(b.vx, b.vy);
-            b.vx = Math.cos(newAngle) * speed;
-            b.vy = Math.sin(newAngle) * speed;
-            b.target = nearest;
-          }
           pierceLeft--;
           b.pierce = pierceLeft;
           continue;
@@ -1970,24 +1884,9 @@ function checkCollisions() {
         boss.hp -= b.damage;
         const bossDmgText = b.damage % 1 === 0 ? b.damage.toString() : b.damage.toFixed(2).replace(/\.?0+$/, '');
         floatingTexts.push({ x: boss.x, y: boss.y - 40, text: bossDmgText, life: 30, color: '#ff66aa' });
-        player.energy = Math.min(getMaxEnergy(), player.energy + ENERGY_PER_KILL * 0.5);
+        const eg = getEnergyGain(); player.energy = Math.min(getMaxEnergy(), player.energy + eg.flat * 0.5);
         if (pierceLeft > 0) {
           hitTargets.push(boss.id || 'boss');
-          // 穿透弹打boss后继续找下一个目标
-          let nearest = null, nearestDist = Infinity;
-          enemies.forEach(e => {
-            if (!hitTargets.includes(e.id) && e.hp > 0) {
-              const d = Math.hypot(b.x - e.x, b.y - e.y);
-              if (d < nearestDist) { nearestDist = d; nearest = e; }
-            }
-          });
-          if (nearest) {
-            const newAngle = Math.atan2(nearest.y - b.y, nearest.x - b.x);
-            const speed = Math.hypot(b.vx, b.vy);
-            b.vx = Math.cos(newAngle) * speed;
-            b.vy = Math.sin(newAngle) * speed;
-            b.target = nearest;
-          }
           pierceLeft--;
           b.pierce = pierceLeft;
           continue;
@@ -2278,61 +2177,33 @@ function render() {
     
     // Shield indicator
     if (shieldActive) {
-      ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 3;
+      ctx.strokeStyle = '#00aaff'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 8, 0, Math.PI * 2); ctx.stroke();
     }
     
     // === 所有技能视觉效果（并行显示）===
     
-    // 蓄力弹光环 - 只要选择了蓄力强化技能就显示
+    // 蓄力弹光环 - 单圈显示
     if (skillStacks['charge'] > 0) {
       const chargeLvl = skillStacks['charge'] || 0;
-      const chargePercent = chargeTimer > 0 ? Math.min(chargeTimer / 60, 1) : 0;
-      const pulseScale = 1 + Math.sin(frameCount * 0.3) * 0.05;
+      const chargeInterval = chargeLvl >= 3 ? 80 : 120;
+      const chargePercent = chargeTimer > 0 ? Math.min(chargeTimer / chargeInterval, 1) : 0;
       const radiusBoost = chargeLvl * 5;
-      // 外层光环
-      ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 3 + chargeLvl;
-      ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 15 + chargeLvl * 5;
+      // 单层光环
+      ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, (player.radius + 20 + radiusBoost) * pulseScale, 0, Math.PI * 2);
-      ctx.stroke();
-      // 内层光环
-      ctx.strokeStyle = 'rgba(255,255,0,0.5)'; ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, (player.radius + 10 + radiusBoost) * pulseScale, 0, Math.PI * 2);
+      ctx.arc(player.x, player.y, player.radius + 20 + radiusBoost, 0, Math.PI * 2);
       ctx.stroke();
       // 充能进度
       if (chargePercent > 0) {
-        ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 4;
+        ctx.strokeStyle = '#00aaff'; ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(player.x, player.y, player.radius + 25, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * chargePercent);
         ctx.stroke();
       }
-      ctx.shadowBlur = 0;
     }
     
-    // 散弹视觉 - 只要选择了散弹技能就显示扇形范围
-    if (skillStacks['scatter'] > 0) {
-      const scatterLvl = skillStacks['scatter'] || 0;
-      const bulletCount = 3 + scatterLvl;
-      const spreadAngle = Math.PI / 4;
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255,200,0,0.4)'; ctx.lineWidth = 2;
-      ctx.setLineDash([5, 5]);
-      // 绘制散弹扇形指示
-      for (let i = 0; i < bulletCount; i++) {
-        const offsetAngle = (bulletCount > 1) ? spreadAngle * (i / (bulletCount - 1) - 0.5) : 0;
-        const startAngle = -Math.PI / 2 + offsetAngle - 0.1;
-        const endAngle = -Math.PI / 2 + offsetAngle + 0.1;
-        ctx.beginPath();
-        ctx.moveTo(player.x, player.y);
-        ctx.arc(player.x, player.y, player.radius + 40, startAngle, endAngle);
-        ctx.closePath();
-        ctx.stroke();
-      }
-      ctx.setLineDash([]);
-      ctx.restore();
-    }
+    // 散弹视觉效果已移除
     
     // 光刀弧 - 只要选择了光刀技能就显示
     if (skillStacks['blade'] > 0) {
@@ -2517,7 +2388,7 @@ function render() {
   
   // Shield display
   if (shieldActive) {
-    ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 3;
+    ctx.strokeStyle = '#00aaff'; ctx.lineWidth = 3;
     ctx.shadowColor = '#00ff00'; ctx.shadowBlur = 15;
     ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 12, 0, Math.PI * 2); ctx.stroke();
     ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 8, 0, Math.PI * 2); ctx.stroke();

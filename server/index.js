@@ -182,9 +182,18 @@ app.get('/api/progress', authMiddleware, async (req, res) => {
         totalWins: 0
       });
     }
+    const savedUpgrades = JSON.parse(row.upgrades);
+    // 标准化升级数据，确保包含所有客户端期望的字段
+    const upgrades = {
+      laserDamage: savedUpgrades.laserDamage || savedUpgrades.armor || 0,
+      emWaveDamage: savedUpgrades.emWaveDamage || savedUpgrades.engine || 0,
+      basicDamage: savedUpgrades.basicDamage || savedUpgrades.core || 0,
+      basicFireRate: savedUpgrades.basicFireRate || savedUpgrades.fireRate || 0,
+      moveSpeed: savedUpgrades.moveSpeed || 0
+    };
     res.json({
       geoFragments: row.geo_fragments,
-      upgrades: JSON.parse(row.upgrades),
+      upgrades: upgrades,
       unlockedWeapons: JSON.parse(row.unlocked_weapons),
       bestWave: row.best_wave,
       totalGamesPlayed: row.total_games_played,
@@ -209,12 +218,12 @@ app.post('/api/progress', authMiddleware, async (req, res) => {
     if (existing) {
       await dbRun(`
         UPDATE user_progress SET 
-          geo_fragments = COALESCE(?, geo_fragments),
-          upgrades = COALESCE(?, upgrades),
-          unlocked_weapons = COALESCE(?, unlocked_weapons),
-          best_wave = COALESCE(?, best_wave),
-          total_games_played = COALESCE(?, total_games_played),
-          total_wins = COALESCE(?, total_wins),
+          geo_fragments = ?,
+          upgrades = ?,
+          unlocked_weapons = ?,
+          best_wave = ?,
+          total_games_played = ?,
+          total_wins = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ?
       `, [geoFragments, upgradesStr, weaponsStr, bestWave, totalGamesPlayed, totalWins, req.userId]);
