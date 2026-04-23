@@ -259,7 +259,7 @@ let progressData = {
 // 升级配置
 const UPGRADE_CONFIG = {
   laserDamage: { name: '🔫 激光伤害', base: 2, perLevel: 0.4, unit: '伤害/帧', maxLevel: 3, baseCost: 50, costInc: 30 },
-  emWaveDamage: { name: '⚡ 电磁波伤害', base: 100, perLevel: 50, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
+  emWaveDamage: { name: '⚡ 电磁波伤害', base: 50, perLevel: 25, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
   basicDamage: { name: '💥 基础伤害', base: 15, perLevel: 0.25, unit: '伤害', maxLevel: 3, baseCost: 50, costInc: 30 },
   basicFireRate: { name: '🚀 基础射速', base: 14, perLevel: -0.15, unit: '帧间隔', maxLevel: 3, baseCost: 50, costInc: 30 }
 };
@@ -1777,7 +1777,7 @@ function updatePlayer() {
 
 let kWaves = []; // 支持多波纹
 const K_WAVE_SPEED = 12;
-const K_WAVE_FIXED_DAMAGE = 100;
+const K_WAVE_FIXED_DAMAGE = 50;
 const K_WAVE_DAMAGE_PER_LEVEL = 15;
 const K_WAVE_INTERVAL = 15; // 波纹之间延迟帧数
 
@@ -1796,7 +1796,7 @@ function tryScreenClear() {
         maxRadius: maxRadius,
         hit: new Set(), // 共享hit集合避免重复伤害
         delay: i * K_WAVE_INTERVAL,
-        dmgMultiplier: i === 0 ? 1.0 : 0.2, // 首波100%, 后续20%
+        dmgMultiplier: i === 0 ? 1.0 : 0.1, // 首波100%, 后续20%
         frame: -i * K_WAVE_INTERVAL // 负数表示等待
       });
     }
@@ -1816,7 +1816,7 @@ function updateKWave() {
     // 收集当前所有活着的敌人
     const aliveEnemies = enemies.filter(e => e.hp > 0);
     const emWaveUpgradeLvl = progressData.upgrades.emWaveDamage || 0;
-    const waveBaseDmg = K_WAVE_FIXED_DAMAGE * (1 + emWaveUpgradeLvl * 0.50);
+    const waveBaseDmg = K_WAVE_FIXED_DAMAGE * (1 + emWaveUpgradeLvl * 0.5);
     for (const e of aliveEnemies) {
       if (kw.hit.has(e)) continue;
       const dist = Math.hypot(e.x - kw.x, e.y - kw.y);
