@@ -1594,7 +1594,7 @@ function updatePlayerShooting() {
       const e = enemies[i];
       if (e.hp <= 0) continue;
       const dist = Math.hypot(e.x - player.x, e.y - player.y);
-      if (dist < bladeRadius + e.radius && dist > bladeRadius * 0.3  // 内圈半径) {
+      if (dist < bladeRadius + e.radius && dist > bladeRadius * 0.3) {
         const ang = Math.atan2(e.y - player.y, e.x - player.x);
         let angleDiff = ang - meleeAngle;
         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
@@ -1608,7 +1608,7 @@ function updatePlayerShooting() {
     // Boss伤害
     if (boss && boss.hp > 0) {
       const dist = Math.hypot(boss.x - player.x, boss.y - player.y);
-      if (dist < bladeRadius + boss.radius && dist > bladeRadius * 0.3  // 内圈半径) {
+      if (dist < bladeRadius + boss.radius && dist > bladeRadius * 0.3) {
         const ang = Math.atan2(boss.y - player.y, boss.x - player.x);
         let normAng = ang;
         while (normAng < 0) normAng += Math.PI * 2;
