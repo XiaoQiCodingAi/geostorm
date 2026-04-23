@@ -78,7 +78,7 @@ const TEST_ROGUE_WAVES = [
 
 // 正式波次配置
 const ROGUE_WAVES = [
-  { enemies: [{type:'triangle',count:15},{type:'square',count:15},{type:'circle',count:8}], eliteChance: 0.1 },
+  { enemies: [{type:'triangle',count:15},{type:'circle',count:8}], eliteChance: 0.1 },
   { enemies: [{type:'square',count:12},{type:'circle',count:10},{type:'triangle',count:8}], eliteChance: 0.15 },
   { enemies: [{type:'circle',count:12},{type:'triangle',count:10},{type:'square',count:8}], eliteChance: 0.2 },
   { enemies: [{type:'triangle',count:12},{type:'square',count:10},{type:'circle',count:8},{type:'chaser',count:6}], eliteChance: 0.25 },
