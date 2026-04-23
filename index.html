@@ -1698,7 +1698,7 @@ function updatePlayer() {
       const laserChainLevel = skillStacks['laser'] || 0;
       const laserChainCount = 1 + laserChainLevel; // 1-5 targets
       let laserDamage = J_SKILL_DAMAGE * (1 + laserLvl * 0.40);
-      const chainDamage = laserDamage; // 连锁伤害与主激光相同
+      const chainDamage = laserDamage * 0.3; // 连锁伤害与主激光相同
       
       // 记录已被激光命中的目标（使用全局变量以便渲染访问）
       laserHitTargets = [jLaserTarget];
