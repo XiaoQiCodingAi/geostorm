@@ -1239,14 +1239,18 @@ function fireEnemyBullet(enemy) {
       pulses.push({ x: enemy.x, y: enemy.y, radius: enemy.radius, maxRadius: 150, speed: 3, damage: 1, hit: false });
       break;
     case 'pentagon':
-      // 五边形：五连星 - 5发间隔0.3秒逐发（用fireTimer模拟间隔）
-      enemy.pentagonCount = (enemy.pentagonCount || 0) + 1;
-      if (enemy.pentagonCount <= 5) {
-        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 6, color: enemy.color, grazed: false });
+      // 五边形：加特林模式 - 5发同时扇形射出，冷却1秒
+      enemy.pentagonCooldown = (enemy.pentagonCooldown || 0);
+      if (enemy.pentagonCooldown > 0) {
+        enemy.pentagonCooldown--;
+        break; // 冷却中，不发射
       }
-      if (enemy.pentagonCount >= 5) {
-        enemy.pentagonCount = 0; // 重置，准备下一轮
+      // 发射5发扇形弹
+      for (let i = 0; i < 5; i++) {
+        const spreadAngle = (i - 2) * 0.15; // 扇形展开
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle + spreadAngle) * speed, vy: Math.sin(angle + spreadAngle) * speed, radius: 6, color: enemy.color, grazed: false });
       }
+      enemy.pentagonCooldown = 60; // 60帧后 = 1秒冷却
       break;
     case 'hexagon':
       // 六边形：六芒脉冲 - 大脉冲+6发小弹
