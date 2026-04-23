@@ -1228,6 +1228,15 @@ function fireEnemyBullet(enemy) {
         pulses.push({ x: enemy.x, y: enemy.y, radius: enemy.radius, maxRadius: 180, speed: 3.5, damage: 1, hit: false, isCharge: true, color: enemy.color });
       }
       break;
+    case 'hexagon_spiral':
+      // 六边形（无脉冲版）：只有6发螺旋弹
+      const hexSpiralOffset = enemy.spiralAngle || 0;
+      for (let i = 0; i < 6; i++) {
+        const a = angle + hexSpiralOffset + (i / 6) * Math.PI * 2;
+        enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, radius: 5, color: enemy.color, grazed: false });
+      }
+      enemy.spiralAngle = (hexSpiralOffset + 0.3) % (Math.PI * 2);
+      break;
     case 'combo':
       // 精英：炮台+偶尔三连发
       enemyBullets.push({ x: enemy.x, y: enemy.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 7, color: enemy.color, grazed: false });

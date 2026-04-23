@@ -49,11 +49,11 @@ const ENEMY_TYPES = {
   // 五边形：五连星 - 5发间隔0.3秒逐发
   pentagon: { hp: 80, speed: 0.9, bulletSpeed: 1.8, radius: 20, score: 400, color: '#ff8800', fireRate: 45, attackType: 'pentagon' },
   // 六边形：六芒脉冲 - 大脉冲+6发小弹
-  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 1.5, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'hexagon' },
+  hexagon: { hp: 100, speed: 0.8, bulletSpeed: 1.5, radius: 22, score: 500, color: '#aa44ff', fireRate: 70, attackType: 'spiral' },
   // 追踪者：蓄力冲刺
   chaser: { hp: 40, speed: 2.8, bulletSpeed: 0, radius: 18, score: 300, color: '#44ff88', fireRate: 180, attackType: 'dash' },
   // 精英：组合攻击
-  elite: { hp: 50, speed: 1.0, bulletSpeed: 2.0, radius: 25, score: 800, color: '#ffffff', fireRate: 75, attackType: 'combo' }
+  elite: { hp: 50, speed: 1.0, bulletSpeed: 0, radius: 25, score: 800, color: '#ffffff', fireRate: 80, attackType: 'pulse' }
 };
 
 // API 配置
