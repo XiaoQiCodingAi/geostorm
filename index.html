@@ -256,6 +256,7 @@ function initAudio() {
 // 播放指定频率的音效
 function playSound(type) {
   if (!audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   const now = audioCtx.currentTime;
   
   const osc = audioCtx.createOscillator();
@@ -293,7 +294,9 @@ let bgmTimer = null;
 
 // 简单的8-bit风格BGM循环
 function playBGM() {
-  if (!audioCtx || bgmPlaying) return;
+  if (!audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (bgmPlaying) return;
   bgmPlaying = true;
   bgmGain = audioCtx.createGain();
   bgmGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
