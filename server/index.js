@@ -286,7 +286,7 @@ app.get('/api/leaderboard', async (req, res) => {
       JOIN users u ON s.user_id = u.id 
       WHERE u.username NOT IN ('xiaoqi', 'test')
       AND s.id = (
-        SELECT id FROM scores s2 
+        SELECT s2.id FROM scores s2 
         JOIN users u2 ON s2.user_id = u2.id
         WHERE s2.user_id = s.user_id AND u2.username NOT IN ('xiaoqi', 'test')
         ORDER BY s2.score DESC, s2.clear_time ASC 
