@@ -295,7 +295,7 @@ function startLaserSound() {
   if (laserSoundOsc) return; // 已启动
   
   laserSoundGain = audioCtx.createGain();
-  laserSoundGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+  laserSoundGain.gain.setValueAtTime(0.1, audioCtx.currentTime);
   laserSoundGain.connect(audioCtx.destination);
   
   // 电磁嗡嗡声（低频锯齿波）
