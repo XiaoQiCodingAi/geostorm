@@ -268,6 +268,7 @@ function playSound(type) {
     upgrade: { freq: 440, type: 'sine', duration: 0.2, vol: 0.1, freqEnd: 880 },
     pickup:  { freq: 880, type: 'sine', duration: 0.1, vol: 0.08, freqEnd: 1320 },
     laser:   { freq: 1200, type: 'sawtooth', duration: 0.08, vol: 0.06, freqEnd: 600 },
+    emWave:  { freq: 100, type: 'sawtooth', duration: 0.5, vol: 0.15, freqEnd: 400 },
   };
   
   const cfg = configs[type] || configs.shoot;
@@ -1867,6 +1868,7 @@ function updatePlayer() {
   
   let speed = PLAYER_SPEED;
   if (jPressed && player.energy > 0) {
+    if (!player.jSkillActive) { playSound('laser'); } // 只在激活时响一次
     player.jSkillActive = true;
     speed += J_SKILL_SPEED_BONUS;
     player.energy -= ENERGY_DRAIN_RATE / 60;
@@ -1972,6 +1974,7 @@ const K_WAVE_INTERVAL = 15; // 波纹之间延迟帧数
 function tryScreenClear() {
   if (player.energy >= K_SKILL_COST) {
     player.energy = 0;
+    playSound('emWave');
     const maxRadius = Math.hypot(GAME_WIDTH, GAME_HEIGHT); // 全屏范围
     const emWaveLvl = skillStacks['emWave'] || 0; // 局内技能等级
     const waveCount = 1 + emWaveLvl; // Lv.1=2波, Lv.2=3波, Lv.3=4波
