@@ -242,6 +242,44 @@ input:focus { outline: none; border-color: #00ffff; }
 
 <script src="src/config.js"></script>
 <script>
+// ==================== 音效系统 ====================
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+// 播放指定频率的音效
+function playSound(type) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  
+  const configs = {
+    shoot:   { freq: 880, type: 'square', duration: 0.05, vol: 0.08, freqEnd: 440 },
+    enemyDie:{ freq: 200, type: 'square', duration: 0.15, vol: 0.12, freqEnd: 50 },
+    playerHit:{ freq: 150, type: 'sawtooth', duration: 0.2, vol: 0.15, freqEnd: 80 },
+    bossDie: { freq: 300, type: 'square', duration: 0.5, vol: 0.2, freqEnd: 50 },
+    waveClear:{ freq: 660, type: 'square', duration: 0.3, vol: 0.12, freqEnd: 1320 },
+    gameOver:{ freq: 200, type: 'sawtooth', duration: 0.6, vol: 0.15, freqEnd: 50 },
+    upgrade: { freq: 440, type: 'sine', duration: 0.2, vol: 0.1, freqEnd: 880 },
+    pickup:  { freq: 880, type: 'sine', duration: 0.1, vol: 0.08, freqEnd: 1320 },
+    laser:   { freq: 1200, type: 'sawtooth', duration: 0.08, vol: 0.06, freqEnd: 600 },
+  };
+  
+  const cfg = configs[type] || configs.shoot;
+  osc.type = cfg.type;
+  osc.frequency.setValueAtTime(cfg.freq, now);
+  osc.frequency.exponentialRampToValueAtTime(cfg.freqEnd, now + cfg.duration);
+  gain.gain.setValueAtTime(cfg.vol, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + cfg.duration);
+  osc.start(now);
+  osc.stop(now + cfg.duration);
+}
+
 // ==================== API ====================
 let authToken = localStorage.getItem('geo_token');
 let currentUser = null;
@@ -651,6 +689,7 @@ document.addEventListener('keyup', (e) => {
 
 // ==================== GAME FUNCTIONS ====================
 function startGame() {
+  initAudio();
   // 应用局外升级到局内
   const up = progressData.upgrades;
   
@@ -958,6 +997,7 @@ function checkWaveComplete() {
     if (currentWave >= maxWave) {
       // Victory!
       gameState = 'clear';
+      playSound('waveClear');
       finalScore = score + 5000;
       clearTime = gameTime;
       progressData.totalWins++;
@@ -1047,6 +1087,7 @@ function selectSkill(index) {
   
   // 应用技能效果
   activeSkills.push(skill.id);
+  playSound('upgrade');
   if (!skillStacks[skill.id]) skillStacks[skill.id] = 0;
   if (skill.stackable) skillStacks[skill.id]++;
   
@@ -1163,6 +1204,7 @@ function updateEnemies() {
             e.dashTimer = 180 + Math.random() * 120;
           } else {
             player.lives--;
+            playSound('playerHit');
             player.invincible = INVINCIBLE_FRAMES;
             damageReduction = false;
             e.isDashing = false;
@@ -1195,6 +1237,7 @@ function updateEnemies() {
       }
       
       waveEnemiesKilled++;
+      playSound('enemyDie');
       enemies.splice(i, 1); 
       continue;
     }
@@ -1344,6 +1387,7 @@ function checkDropPickup() {
       // 拾取道具
       pendingDrop = { ...drop, timer: 90 };
       activeDrops.splice(i, 1);
+      playSound('pickup');
       applyDrop(drop);
     }
   }
@@ -1415,6 +1459,7 @@ function updateBoss() {
     player.energy = getMaxEnergy();
     boss = null;
     bossDefeated = true;
+    playSound('bossDie');
   }
 }
 
@@ -1532,6 +1577,7 @@ function calculateFinalScoreGameOver() {
 }
 
 function showGameOver(isVictory) {
+  if (!isVictory) playSound('gameOver');
   gameState = isVictory ? 'clear' : 'gameover';
   showScreen('gameOverScreen');
   
@@ -1688,6 +1734,7 @@ function updatePlayerShooting() {
     
     if (player.fireTimer >= effectiveFireRate) {
       player.fireTimer = 0;
+      playSound('shoot');
       
       let target = null, minDist = Infinity;
       enemies.forEach(e => { const d = Math.hypot(e.x - player.x, e.y - player.y); if (d < minDist) { minDist = d; target = e; } });
@@ -2012,7 +2059,7 @@ function checkCollisions() {
           shieldActive = false;
           enemyBullets.splice(i, 1);
         } else {
-          player.lives--; player.invincible = INVINCIBLE_FRAMES; damageReduction = false; enemyBullets.splice(i, 1);
+          player.lives--; playSound('playerHit'); player.invincible = INVINCIBLE_FRAMES; damageReduction = false; enemyBullets.splice(i, 1);
           if (player.lives <= 0) { gameState = 'gameover'; clearTime = gameTime; finalScore = calculateFinalScoreGameOver(); showGameOver(false); }
         }
         break;
@@ -2028,7 +2075,7 @@ function checkCollisions() {
         if (shieldActive) {
           shieldActive = false;
         } else {
-          player.lives--; player.invincible = INVINCIBLE_FRAMES; damageReduction = false;
+          player.lives--; playSound('playerHit'); player.invincible = INVINCIBLE_FRAMES; damageReduction = false;
           if (player.lives <= 0) { gameState = 'gameover'; clearTime = gameTime; finalScore = calculateFinalScoreGameOver(); showGameOver(false); }
         }
         break;
