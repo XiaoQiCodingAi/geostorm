@@ -249,6 +249,7 @@ input:focus { outline: none; border-color: #00ffff; }
 <script>
 // ==================== 音效系统 ====================
 let audioCtx = null;
+let laserSoundOsc = null, laserSoundGain = null;
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
@@ -273,8 +274,8 @@ function playSound(type) {
     gameOver:{ freq: 200, type: 'sawtooth', duration: 0.6, vol: 0.15, freqEnd: 50 },
     upgrade: { freq: 440, type: 'sine', duration: 0.2, vol: 0.1, freqEnd: 880 },
     pickup:  { freq: 880, type: 'sine', duration: 0.1, vol: 0.08, freqEnd: 1320 },
-    laser:   { freq: 1200, type: 'sawtooth', duration: 0.08, vol: 0.06, freqEnd: 600 },
-    emWave:  { freq: 100, type: 'sawtooth', duration: 0.5, vol: 0.15, freqEnd: 400 },
+    laser:   { freq: 1200, type: 'sawtooth', duration: 0.15, vol: 0.2, freqEnd: 600 },
+    emWave:  { freq: 100, type: 'sawtooth', duration: 0.6, vol: 0.3, freqEnd: 400 },
   };
   
   const cfg = configs[type] || configs.shoot;
@@ -286,6 +287,38 @@ function playSound(type) {
   osc.start(now);
   osc.stop(now + cfg.duration);
 }
+
+// 激光持续音效（长按时循环）
+function startLaserSound() {
+  if (!audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (laserSoundOsc) return; // 已启动
+  laserSoundGain = audioCtx.createGain();
+  laserSoundGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+  laserSoundGain.connect(audioCtx.destination);
+  laserSoundOsc = audioCtx.createOscillator();
+  laserSoundOsc.type = 'sawtooth';
+  laserSoundOsc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  // 上下扫频制造动态感
+  laserSoundOsc.frequency.linearRampToValueAtTime(1600, audioCtx.currentTime + 0.3);
+  laserSoundOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.6);
+  laserSoundOsc.connect(laserSoundGain);
+  laserSoundOsc.start();
+  // 循环扫频
+  laserSoundTimer = setInterval(() => {
+    if (!laserSoundOsc) return;
+    laserSoundOsc.frequency.linearRampToValueAtTime(1600, audioCtx.currentTime + 0.3);
+    laserSoundOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.6);
+  }, 600);
+}
+
+function stopLaserSound() {
+  if (laserSoundTimer) clearInterval(laserSoundTimer);
+  if (laserSoundOsc) { laserSoundOsc.stop(); laserSoundOsc.disconnect(); laserSoundOsc = null; }
+  if (laserSoundGain) { laserSoundGain.disconnect(); laserSoundGain = null; }
+}
+
+let laserSoundTimer = null;
 
 // ==================== 背景音乐 ====================
 let bgmGain = null;
@@ -350,6 +383,7 @@ function stopBGM() {
   bgmPlaying = false;
   if (bgmTimer) clearTimeout(bgmTimer);
   if (bgmGain) { bgmGain.disconnect(); bgmGain = null; }
+  stopLaserSound();
 }
 
 // ==================== API ====================
@@ -1877,11 +1911,11 @@ function updatePlayer() {
   
   let speed = PLAYER_SPEED;
   if (jPressed && player.energy > 0) {
-    if (!player.jSkillActive) { playSound('laser'); } // 只在激活时响一次
+    if (!player.jSkillActive) { startLaserSound(); } // 只在激活时启动一次
     player.jSkillActive = true;
     speed += J_SKILL_SPEED_BONUS;
     player.energy -= ENERGY_DRAIN_RATE / 60;
-    if (player.energy <= 0) { player.energy = 0; player.jSkillActive = false; jLaserTarget = null; }
+    if (player.energy <= 0) { stopLaserSound(); player.energy = 0; player.jSkillActive = false; jLaserTarget = null; }
     
     if (!jLaserTarget || jLaserTarget.hp <= 0 || (jLaserTarget === boss && (!boss || boss.hp <= 0))) {
       let minDist = Infinity, newTarget = null;
@@ -1964,6 +1998,7 @@ function updatePlayer() {
       }
     }
   } else {
+    if (player.jSkillActive) stopLaserSound();
     player.jSkillActive = false;
     jLaserTarget = null;
   }
