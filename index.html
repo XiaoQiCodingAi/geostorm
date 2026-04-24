@@ -335,7 +335,7 @@ function startLaserSound() {
     humOsc.frequency.setValueAtTime(80 + Math.random() * 30, audioCtx.currentTime);
   }, 60);
   
-  laserSoundData = { osc2: laserOsc2, humOsc, lfo, noiseSource };
+  laserSoundData = { osc2: laserOsc2, humOsc: humOsc, gain: laserSoundGain };
 }
 
 function stopLaserSound() {
