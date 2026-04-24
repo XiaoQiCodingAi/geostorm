@@ -289,45 +289,63 @@ function playSound(type) {
 }
 
 // 激光持续音效（长按时循环）
+// 激光持续音效（长按时循环）- 电磁风格
 function startLaserSound() {
   if (!audioCtx) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
   if (laserSoundOsc) return; // 已启动
+  
   laserSoundGain = audioCtx.createGain();
-  laserSoundGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+  laserSoundGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
   laserSoundGain.connect(audioCtx.destination);
   
-  // 用两个高频方波错频产生拍频干涉，制造滋滋的电流感
+  // === 低频嗡嗡声（电磁基底）===
+  const humOsc = audioCtx.createOscillator();
+  humOsc.type = 'sawtooth';
+  humOsc.frequency.setValueAtTime(100, audioCtx.currentTime);
+  const humGain = audioCtx.createGain();
+  humGain.gain.value = 0.4;
+  humOsc.connect(humGain);
+  humGain.connect(laserSoundGain);
+  humOsc.start();
+  
+  // === 高频滋滋声（两个方波产生拍频干涉）===
   laserSoundOsc = audioCtx.createOscillator();
-  laserSoundOsc.type = 'square';
-  laserSoundOsc.frequency.setValueAtTime(3200, audioCtx.currentTime);
+  laserSoundOsc.type = 'sawtooth'; // 改锯齿波，更偏电磁感
+  laserSoundOsc.frequency.setValueAtTime(1800, audioCtx.currentTime);
   
   const laserOsc2 = audioCtx.createOscillator();
-  laserOsc2.type = 'square';
-  laserOsc2.frequency.setValueAtTime(3250, audioCtx.currentTime);
+  laserOsc2.type = 'sawtooth';
+  laserOsc2.frequency.setValueAtTime(1850, audioCtx.currentTime);
   
+  // 叠加产生50Hz拍频 = 滋滋的电流声
   const laserMix = audioCtx.createGain();
-  laserMix.gain.value = 0.5;
+  laserMix.gain.value = 0.7;
   laserSoundOsc.connect(laserMix);
   laserOsc2.connect(laserMix);
   laserMix.connect(laserSoundGain);
   laserSoundOsc.start();
   laserOsc2.start();
   
-  // 随机频率抖动制造不稳定的电流感
+  // === 随机频率抖动（更有机的电流感）===
   laserSoundTimer = setInterval(() => {
     if (!laserSoundOsc) return;
-    laserSoundOsc.frequency.setValueAtTime(3000 + Math.random() * 500, audioCtx.currentTime);
-    laserOsc2.frequency.setValueAtTime(3050 + Math.random() * 500, audioCtx.currentTime);
-  }, 40);
+    laserSoundOsc.frequency.setValueAtTime(1700 + Math.random() * 250, audioCtx.currentTime);
+    laserOsc2.frequency.setValueAtTime(1750 + Math.random() * 250, audioCtx.currentTime);
+    humOsc.frequency.setValueAtTime(80 + Math.random() * 30, audioCtx.currentTime);
+  }, 60);
   
-  laserSoundData = { osc2: laserOsc2 };
+  laserSoundData = { osc2: laserOsc2, humOsc, lfo, noiseSource };
 }
 
 function stopLaserSound() {
   if (laserSoundTimer) clearInterval(laserSoundTimer);
-  if (laserSoundOsc) { laserSoundOsc.stop(); laserSoundOsc.disconnect(); laserSoundOsc = null; }
-  if (laserSoundData && laserSoundData.osc2) { laserSoundData.osc2.stop(); laserSoundData.osc2.disconnect(); laserSoundData.osc2 = null; }
+  if (laserSoundOsc) { try { laserSoundOsc.stop(); } catch(e){} laserSoundOsc.disconnect(); laserSoundOsc = null; }
+  if (laserSoundData) {
+    if (laserSoundData.osc2) { try { laserSoundData.osc2.stop(); } catch(e){} laserSoundData.osc2.disconnect(); }
+    if (laserSoundData.humOsc) { try { laserSoundData.humOsc.stop(); } catch(e){} laserSoundData.humOsc.disconnect(); }
+    laserSoundData = null;
+  }
   if (laserSoundGain) { laserSoundGain.disconnect(); laserSoundGain = null; }
 }
 
@@ -339,57 +357,204 @@ let bgmGain = null;
 let bgmPlaying = false;
 let bgmTimer = null;
 
-// 简单的8-bit风格BGM循环
+// C大调频率表 (C D E F G A B C)
+const _n = (oct, n) => 261.63 * Math.pow(2, (n - 1 + oct * 12) / 12);
+const N = {
+  c3:131,_d3:147, d3:147, e3:165, f3:175, g3:196, a3:220, b3:247,
+  c4:262, d4:294, e4:330, f4:349, g4:392, a4:440, b4:494,
+  c5:523, d5:587, e5:659, f5:698, g5:784, a5:880,
+  _: 0 // 休止
+};
+
+// 和弦进行: I - V - vi - IV (C - G - Am - F)
+const CHORDS = [
+  [N.c3, N.e3, N.g3],   // C
+  [N.g3, N.b3, N.d4],   // G
+  [N.a3, N.c4, N.e4],   // Am
+  [N.f3, N.a3, N.c4],   // F
+];
+const BASS_NOTES = [N.c3, N.g3, N.a3, N.f3]; // 根音
+
+// 多段旋律 (16步一段)
+const PHRASES = [
+  // Phrase A: 上升感
+  [N.c4,N._,N.e4,N._, N.g4,N._, N.c5,N._,
+   N.b4,N._,N.g4,N._, N.a4,N._,N.f4,N._],
+  // Phrase B: 下降感
+  [N.c5,N._,N.g4,N._, N.e4,N._, N.c4,N._,
+   N.d4,N._,N.f4,N._, N.g4,N._,N.e4,N._],
+  // Phrase C: 跳跃感
+  [N.g4,N._,N.c5,N._, N.e4,N._, N.g4,N._,
+   N.a4,N._,N.f4,N._, N.c4,N._,N.e4,N._],
+  // Phrase D: 平静
+  [N.e4,N._,N.f4,N._, N.g4,N._, N.a4,N._,
+   N.g4,N._,N.f4,N._, N.e4,N._,N.d4,N._],
+];
+
+// 分解和弦点缀 (穿插在主旋律间)
+const ARPS = [
+  [N.c4,N.e4,N.g4,N.e4], [N.g3,N.b3,N.d4,N.b3],
+  [N.a3,N.c4,N.e4,N.c4], [N.f3,N.a3,N.c4,N.a3],
+  [N.c4,N.g4,N.c5,N.g4], [N.g3,N.d4,N.g4,N.d4],
+  [N.a3,N.e4,N.a4,N.e4], [N.f3,N.c4,N.f4,N.c4],
+];
+
+// 鼓点节奏 (每8步循环)
+const KICK  = [1,0,0,0, 1,0,1,0];  // 低音鼓
+const SNARE = [0,0,0,0, 1,0,0,0];  // 军鼓
+const HIHAT = [1,0,1,0, 1,0,1,0];  // 踩镲
+
+// 当前状态
+let _phraseIdx = 0;
+let _phraseCount = 0;
+let _arpIdx = 0;
+let _beatStep = 0; // 8步鼓机计数
+
+function makeDrum(t, type, vol) {
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.connect(g); g.connect(bgmGain);
+  if (type === 'kick') {
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    osc.start(t); osc.stop(t + 0.15);
+  } else if (type === 'snare') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(200, t);
+    osc.frequency.exponentialRampToValueAtTime(120, t + 0.08);
+    g.gain.setValueAtTime(vol * 0.8, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+    osc.start(t); osc.stop(t + 0.12);
+    // 噪声成分
+    const nb = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.1, audioCtx.sampleRate);
+    const nd = nb.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const ns = audioCtx.createBufferSource();
+    ns.buffer = nb;
+    const nf = audioCtx.createBiquadFilter();
+    nf.type = 'highpass'; nf.frequency.value = 2000;
+    const ng = audioCtx.createGain();
+    ng.gain.setValueAtTime(vol * 0.5, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    ns.connect(nf); nf.connect(ng); ng.connect(bgmGain);
+    ns.start(t); ns.stop(t + 0.1);
+  } else if (type === 'hihat') {
+    const nb = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.05, audioCtx.sampleRate);
+    const nd = nb.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const ns = audioCtx.createBufferSource();
+    ns.buffer = nb;
+    const nf = audioCtx.createBiquadFilter();
+    nf.type = 'highpass'; nf.frequency.value = 7000;
+    const ng = audioCtx.createGain();
+    ng.gain.setValueAtTime(vol * 0.3, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    ns.connect(nf); nf.connect(ng); ng.connect(bgmGain);
+    ns.start(t); ns.stop(t + 0.05);
+  }
+}
+
 function playBGM() {
   if (!audioCtx) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
   if (bgmPlaying) return;
   bgmPlaying = true;
+  _phraseIdx = 0; _phraseCount = 0; _arpIdx = 0; _beatStep = 0;
+
   bgmGain = audioCtx.createGain();
-  bgmGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+  bgmGain.gain.setValueAtTime(0.22, audioCtx.currentTime);
   bgmGain.connect(audioCtx.destination);
-  
-  // 音符频率 (C大调低音)
-  const notes = [130.81, 164.81, 196.00, 261.63, 293.66, 329.63, 392.00, 523.25];
-  // 旋律片段 (相对音高 index)
-  const melody = [0,2,4,7, 4,2,0,-1, 0,2,4,7, 5,4,2,-1];
-  const bass =   [0,0,4,4, 5,5,3,3, 0,0,4,4, 5,4,2,2];
-  
+
+  const bpm = 148;
+  const step16 = 60 / bpm / 2;      // 16分音符时值
+  const step8  = step16 * 2;         // 8分音符时值
+
+  // 当前phrase
+  let phrase = PHRASES[_phraseIdx];
   let step = 0;
-  const bpm = 140;
-  const stepTime = 60 / bpm / 2; // 16分音符
-  
+
   function schedule() {
     if (!bgmPlaying) return;
-    const now = audioCtx.currentTime;
-    const idx = step % melody.length;
-    
-    // 旋律声部
-    if (melody[idx] >= 0) {
-      const osc1 = audioCtx.createOscillator();
-      const g1 = audioCtx.createGain();
-      osc1.type = 'square';
-      osc1.frequency.value = notes[melody[idx]];
-      g1.gain.setValueAtTime(0.06, now);
-      g1.gain.exponentialRampToValueAtTime(0.001, now + stepTime * 0.9);
-      osc1.connect(g1); g1.connect(bgmGain);
-      osc1.start(now); osc1.stop(now + stepTime * 0.9);
+    const t = audioCtx.currentTime;
+
+    // 鼓点 (每8步循环)
+    const bi = _beatStep % 8;
+    if (KICK[bi])  makeDrum(t, 'kick',   0.5);
+    if (SNARE[bi]) makeDrum(t, 'snare',  0.35);
+    if (HIHAT[bi]) makeDrum(t, 'hihat',  0.25);
+    _beatStep++;
+
+    // 每16步换和弦 + 切换phrase
+    if (step % 16 === 0) {
+      const chordIdx = Math.floor(step / 16) % 4;
+      // 和弦垫音 (长音)
+      const chord = CHORDS[chordIdx];
+      chord.forEach((freq, ci) => {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = ci === 2 ? 'sine' : 'triangle';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(0.06, t);
+        g.gain.setValueAtTime(0.06, t + step16 * 14);
+        g.gain.exponentialRampToValueAtTime(0.001, t + step16 * 16);
+        osc.connect(g); g.connect(bgmGain);
+        osc.start(t); osc.stop(t + step16 * 16);
+      });
+      // 低音
+      const bassOsc = audioCtx.createOscillator();
+      const bassG = audioCtx.createGain();
+      bassOsc.type = 'sawtooth';
+      bassOsc.frequency.value = BASS_NOTES[chordIdx];
+      bassG.gain.setValueAtTime(0.2, t);
+      bassG.gain.exponentialRampToValueAtTime(0.001, t + step16 * 16);
+      bassOsc.connect(bassG); bassG.connect(bgmGain);
+      bassOsc.start(t); bassOsc.stop(t + step16 * 16);
+
+      // phrase切换: 每个和弦换一次
+      if (step > 0) {
+        _phraseIdx = (_phraseIdx + 1) % PHRASES.length;
+      }
+      phrase = PHRASES[_phraseIdx];
     }
-    
-    // 低音声部
-    const osc2 = audioCtx.createOscillator();
-    const g2 = audioCtx.createGain();
-    osc2.type = 'triangle';
-    osc2.frequency.value = notes[bass[idx]] / 2;
-    g2.gain.setValueAtTime(0.22, now);
-    g2.gain.exponentialRampToValueAtTime(0.001, now + stepTime * 0.95);
-    osc2.connect(g2); g2.connect(bgmGain);
-    osc2.start(now); osc2.stop(now + stepTime * 0.95);
-    
+
+    // 主旋律
+    const note = phrase[step % 16];
+    if (note > 0) {
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = note;
+      g.gain.setValueAtTime(0.07, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + step16 * 0.85);
+      osc.connect(g); g.connect(bgmGain);
+      osc.start(t); osc.stop(t + step16 * 0.9);
+    }
+
+    // 分解和弦点缀 (每4步)
+    if (step % 4 === 0) {
+      const chordIdx = Math.floor(step / 16) % 4;
+      const arp = ARPS[(chordIdx * 2 + Math.floor(step / 4)) % ARPS.length];
+      arp.forEach((note, ai) => {
+        if (note <= 0) return;
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = note * 2; // 高一个八度
+        const dt = ai * step16 * 0.25;
+        g.gain.setValueAtTime(0, t);
+        g.gain.setValueAtTime(0.04, t + dt);
+        g.gain.exponentialRampToValueAtTime(0.001, t + dt + step16 * 0.5);
+        osc.connect(g); g.connect(bgmGain);
+        osc.start(t + dt); osc.stop(t + dt + step16 * 0.55);
+      });
+    }
+
     step++;
-    bgmTimer = setTimeout(schedule, stepTime * 1000);
+    bgmTimer = setTimeout(schedule, step16 * 1000);
   }
-  
+
   schedule();
 }
 
@@ -498,7 +663,7 @@ async function doLogin() {
     });
     const data = await res.json();
     
-    if (!res.ok) { errorEl.textContent = data.error || '登录失败'; return; }
+    if (!res.ok) { errorEl.textContent = '用户名或密码错误'; return; }
     
     authToken = data.token;
     currentUser = data.username;
