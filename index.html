@@ -289,7 +289,6 @@ function playSound(type) {
 }
 
 // 激光持续音效（长按时循环）
-// 激光持续音效（长按时循环）- 电磁风格
 function startLaserSound() {
   if (!audioCtx) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -299,43 +298,31 @@ function startLaserSound() {
   laserSoundGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
   laserSoundGain.connect(audioCtx.destination);
   
-  // === 低频嗡嗡声（电磁基底）===
+  // 电磁嗡嗡声（低频锯齿波）
   const humOsc = audioCtx.createOscillator();
   humOsc.type = 'sawtooth';
   humOsc.frequency.setValueAtTime(100, audioCtx.currentTime);
-  const humGain = audioCtx.createGain();
-  humGain.gain.value = 0.4;
-  humOsc.connect(humGain);
-  humGain.connect(laserSoundGain);
+  humOsc.connect(laserSoundGain);
   humOsc.start();
   
-  // === 高频滋滋声（两个方波产生拍频干涉）===
-  laserSoundOsc = audioCtx.createOscillator();
-  laserSoundOsc.type = 'sawtooth'; // 改锯齿波，更偏电磁感
-  laserSoundOsc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+  // 50Hz交流嗡声（模拟电磁变压器的交流声）
+  const acOsc = audioCtx.createOscillator();
+  acOsc.type = 'square';
+  acOsc.frequency.setValueAtTime(50, audioCtx.currentTime);
+  const acGain = audioCtx.createGain();
+  acGain.gain.value = 0.3;
+  acOsc.connect(acGain);
+  acGain.connect(laserSoundGain);
+  acOsc.start();
   
-  const laserOsc2 = audioCtx.createOscillator();
-  laserOsc2.type = 'sawtooth';
-  laserOsc2.frequency.setValueAtTime(1850, audioCtx.currentTime);
-  
-  // 叠加产生50Hz拍频 = 滋滋的电流声
-  const laserMix = audioCtx.createGain();
-  laserMix.gain.value = 0.7;
-  laserSoundOsc.connect(laserMix);
-  laserOsc2.connect(laserMix);
-  laserMix.connect(laserSoundGain);
-  laserSoundOsc.start();
-  laserOsc2.start();
-  
-  // === 随机频率抖动（更有机的电流感）===
+  // 随机抖动模拟不稳定的电流
   laserSoundTimer = setInterval(() => {
-    if (!laserSoundOsc) return;
-    laserSoundOsc.frequency.setValueAtTime(1700 + Math.random() * 250, audioCtx.currentTime);
-    laserOsc2.frequency.setValueAtTime(1750 + Math.random() * 250, audioCtx.currentTime);
-    humOsc.frequency.setValueAtTime(80 + Math.random() * 30, audioCtx.currentTime);
-  }, 60);
+    if (!laserSoundGain) return;
+    humOsc.frequency.setValueAtTime(90 + Math.random() * 30, audioCtx.currentTime);
+    acOsc.frequency.setValueAtTime(48 + Math.random() * 6, audioCtx.currentTime);
+  }, 50);
   
-  laserSoundData = { osc2: laserOsc2, humOsc: humOsc, gain: laserSoundGain };
+  laserSoundData = { osc2: acOsc, humOsc: humOsc, gain: laserSoundGain };
 }
 
 function stopLaserSound() {
