@@ -76,7 +76,12 @@ input:focus { outline: none; border-color: #00ffff; }
 }
 .user-info span { color: #00ffff; cursor: pointer; }
 .user-info span:hover { text-decoration: underline; }
-.menu-hint { color: #666; font-size: 14px; margin-top: 20px; }
+.menu-hint { color: #888; font-size: 15px; margin-top: 20px; line-height: 1.8; }
+.menu-hint span { padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+.menu-hint .key { background: #333; color: #fff; }
+.menu-hint .move { color: #00ffff; }
+.menu-hint .j-key { color: #ff66aa; }
+.menu-hint .k-key { color: #44ff88; }
 
 /* Wave Select Screen */
 .wave-select-title { color: #ffff00; font-size: 28px; margin-bottom: 20px; }
@@ -166,7 +171,7 @@ input:focus { outline: none; border-color: #00ffff; }
   <button class="btn secondary" onclick="showUpgrade()">🔧 战机升级</button>
   <button class="btn secondary" onclick="showMyRecords()">📊 我的记录</button>
   <button class="btn secondary" onclick="showLeaderboard()">🏆 总榜单</button>
-  <p class="menu-hint">WASD/方向键移动 | J激光锁定 | K清屏</p>
+  <p class="menu-hint"><span class="key">WASD/方向键</span> 移动 &nbsp; <span class="key j-key">J</span> 激光锁定 &nbsp; <span class="key k-key">K</span> 清屏</p>
 </div>
 
 <!-- 战机升级界面 -->
@@ -193,14 +198,14 @@ input:focus { outline: none; border-color: #00ffff; }
   <div style="text-align:left;max-width:500px;margin:0 auto;">
     <div style="background:#1a1a2e;padding:15px;margin:10px 0;border-radius:8px;">
       <div style="color:#00ffff;font-size:18px;">🎯 基础操作</div>
-      <div style="color:#888;font-size:14px;margin-top:8px;">WASD / 方向键：移动战机<br>空格：开始战斗 / 确认</div>
+      <div style="color:#888;font-size:14px;margin-top:8px;"><span style="background:#333;color:#fff;padding:1px 6px;border-radius:3px;">WASD</span> / <span style="background:#333;color:#fff;padding:1px 6px;border-radius:3px;">方向键</span> 移动战机 &nbsp; <span style="background:#333;color:#fff;padding:1px 6px;border-radius:3px;">空格</span> 开始战斗 / 确认</div>
     </div>
     <div style="background:#1a1a2e;padding:15px;margin:10px 0;border-radius:8px;">
-      <div style="color:#ff4444;font-size:18px;">J 激光锁定</div>
+      <div style="color:#ff66aa;font-size:18px;"><span style="background:#333;color:#fff;padding:1px 8px;border-radius:3px;">J</span> 激光锁定</div>
       <div style="color:#888;font-size:14px;margin-top:8px;">按住J键激活激光模式<br>激光会追踪锁定目标并造成持续伤害<br>消耗能量，松开J或能量耗尽时关闭</div>
     </div>
     <div style="background:#1a1a2e;padding:15px;margin:10px 0;border-radius:8px;">
-      <div style="color:#44ff88;font-size:18px;">K 屏幕清屏</div>
+      <div style="color:#44ff88;font-size:18px;"><span style="background:#333;color:#fff;padding:1px 8px;border-radius:3px;">K</span> 屏幕清屏</div>
       <div style="color:#888;font-size:14px;margin-top:8px;">消耗200能量释放全屏电磁波<br>对敌人造成30/40/50/60点伤害</div>
     </div>
     <div style="background:#1a1a2e;padding:15px;margin:10px 0;border-radius:8px;">
