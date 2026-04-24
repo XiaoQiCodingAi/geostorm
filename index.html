@@ -296,29 +296,43 @@ function startLaserSound() {
   laserSoundGain = audioCtx.createGain();
   laserSoundGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
   laserSoundGain.connect(audioCtx.destination);
+  
+  // 用两个高频方波错频产生拍频干涉，制造滋滋的电流感
   laserSoundOsc = audioCtx.createOscillator();
-  laserSoundOsc.type = 'sawtooth';
-  laserSoundOsc.frequency.setValueAtTime(800, audioCtx.currentTime);
-  // 上下扫频制造动态感
-  laserSoundOsc.frequency.linearRampToValueAtTime(1600, audioCtx.currentTime + 0.3);
-  laserSoundOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.6);
-  laserSoundOsc.connect(laserSoundGain);
+  laserSoundOsc.type = 'square';
+  laserSoundOsc.frequency.setValueAtTime(3200, audioCtx.currentTime);
+  
+  const laserOsc2 = audioCtx.createOscillator();
+  laserOsc2.type = 'square';
+  laserOsc2.frequency.setValueAtTime(3250, audioCtx.currentTime);
+  
+  const laserMix = audioCtx.createGain();
+  laserMix.gain.value = 0.5;
+  laserSoundOsc.connect(laserMix);
+  laserOsc2.connect(laserMix);
+  laserMix.connect(laserSoundGain);
   laserSoundOsc.start();
-  // 循环扫频
+  laserOsc2.start();
+  
+  // 随机频率抖动制造不稳定的电流感
   laserSoundTimer = setInterval(() => {
     if (!laserSoundOsc) return;
-    laserSoundOsc.frequency.linearRampToValueAtTime(1600, audioCtx.currentTime + 0.3);
-    laserSoundOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.6);
-  }, 600);
+    laserSoundOsc.frequency.setValueAtTime(3000 + Math.random() * 500, audioCtx.currentTime);
+    laserOsc2.frequency.setValueAtTime(3050 + Math.random() * 500, audioCtx.currentTime);
+  }, 40);
+  
+  laserSoundData = { osc2: laserOsc2 };
 }
 
 function stopLaserSound() {
   if (laserSoundTimer) clearInterval(laserSoundTimer);
   if (laserSoundOsc) { laserSoundOsc.stop(); laserSoundOsc.disconnect(); laserSoundOsc = null; }
+  if (laserSoundData && laserSoundData.osc2) { laserSoundData.osc2.stop(); laserSoundData.osc2.disconnect(); laserSoundData.osc2 = null; }
   if (laserSoundGain) { laserSoundGain.disconnect(); laserSoundGain = null; }
 }
 
 let laserSoundTimer = null;
+let laserSoundData = null;
 
 // ==================== 背景音乐 ====================
 let bgmGain = null;
